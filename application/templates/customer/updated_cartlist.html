@@ -1,0 +1,69 @@
+{% extends "layout.html" %}
+{% block title %}Cartlist - MediCart {% endblock %}
+{% block content %}
+<div class="containerr">
+    <h1>{{current_user.username}}'s Cart</h1>
+    <div class="cart">
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            {%for items in cart.cart_items%}
+            {%if items%}
+            <tbody id="cart-items">
+                <!-- Items will be dynamically added here -->
+            <td>{{items.product.productname}}</td>
+            <td>M{{items.product.price}}</td>
+            <td>{{items.quantity}}</td>
+
+            <td>
+                <form action="{{url_for('main.remove_from_cart',item_id=items.id)}}" method="POST">
+                    {{form2.csrf_token}}
+                    {{form2.submit(class='buybtn')}}
+                </form>
+            </td>
+            </tbody>
+            {%else%}
+
+                    <div class="cart-summary">
+                        <p>Cart is Empty</p>
+        </div>
+            {%endif%}
+            {%endfor%}
+        </table>
+        <div class="cart-summary">
+            <p>Total Price: M<span id="total-price">{{total_amount}}</span> includes Delivery Fees</p>
+        </div>
+        <form action="{{url_for('main.addorder',total_amount=total_amount)}}" method="POST">
+                    {{form3.csrf_token}}
+                    <div class="form-group">
+                        {{form3.payment.label}}
+                        {{form3.payment(class='form-control')}}
+                    </div>
+                    <div class="form-group">
+                        {{form3.drop_address.label}}
+                        {{form3.drop_address(class='form-control')}}
+                    </div>
+                        <div class="form-group">
+                        {{form3.transid.label}}
+                        {{form3.transid(class='form-control')}}
+                    </div>
+        <div class="button-container">
+            <!-- Shop Button -->
+
+  <button type="submit" class="btn btn-light btn-sm"
+          onclick="window.location.href='{{ url_for('main.addorder', total_amount=total_amount)}}'">Add Order
+  </button>
+
+        </div>
+
+                </form>
+    </div>
+</div>
+
+{% endblock %}

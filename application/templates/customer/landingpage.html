@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% block title %}MediCare Landing Page{% endblock %}
+{% block content %}
+  <style>
+    .hero-section {
+      background: linear-gradient(to right, #1d8cf8, #3358f4);
+      color: white;
+      padding: 60px 0;
+    }
+    .features-section {
+      background-color: #f8f9fa;
+      padding: 60px 0;
+    }
+    .feature-icon {
+      font-size: 3rem;
+      color: #1d8cf8;
+    }
+  </style>
+<main>
+    <section class="hero-section text-center">
+      <div class="containerr">
+        <h1 class="display-4 fw-bold">Medicart. Delivered.</h1>
+        <p class="lead mt-3">MediCart helps you browse, order, and receive medications from trusted pharmacies right at your doorstep in Lesotho.</p>
+        <a href="cart.html" class="btn btn-outline-primary rounded-pill">Order Now</a>
+      </div>
+    </section>
+
+    <section class="features-section text-center">
+      <div class="container">
+        <h2 class="mb-5">Why Choose MediCart?</h2>
+        <div class="row g-4">
+          <div class="col-md-4">
+            <div class="card h-100 shadow-sm p-4">
+              <div class="feature-icon mb-3">🛒</div>
+              <h5>Easy Ordering</h5>
+              <p>Browse and order from a wide selection of medications with just a few taps.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card h-100 shadow-sm p-4">
+              <div class="feature-icon mb-3">🚚</div>
+              <h5>Fast Delivery</h5>
+              <p>We deliver your prescriptions and health essentials directly to your door.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card h-100 shadow-sm p-4">
+              <div class="feature-icon mb-3">🎁</div>
+              <h5>Loyalty Rewards</h5>
+              <p>Earn rewards for every purchase and enjoy exclusive discounts and perks.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="text-center py-5 bg-white">
+      <div class="container">
+        <h2>Start Your Journey with MediCart</h2>
+        <p class="mb-4">Safe, convenient, and reliable access to your medications—anytime, anywhere in Lesotho.</p>
+        <a href="register.html" class="btn btn-outline-primary rounded-pill">Create an Account</a>
+      </div>
+    </section>
+  </main>
+{% endblock %}

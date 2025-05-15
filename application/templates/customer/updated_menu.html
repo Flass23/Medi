@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}Menu - MediCart {% endblock %}
+{% block content %}
+<div class="container">
+     <div class="d-flex justify-content-between mb-4">
+        <h1>Pharmacy Store - Products</h1>
+
+    </div>
+
+    <div class="product-grid">
+        {% for product in products %}
+        <div class="product-card">
+
+            <img class="image-top" src="{{ url_for('static', filename='css/images/products/'+ product.pictures) }}" alt="{{ product.name }}">
+            <div class="product-name">{{ product.productname }}</div>
+            <div class="product-price">M{{ product.price }}</div>
+            <div class="product-description"><p>{{ product.description }}</p></div>
+            <a href="{{url_for('main.viewproduct', product_id=product.id)}}">More...</a>
+            <div class="actions">
+                <button value={{product.id}} onclick="window.location.href='{{ url_for('main.add_to_cart', item_id=product.id)}}'" class='btn btn-outline-primary rounded-pill' type="submit">Add To Cart
+              </button>
+
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="pagination">
+        {% if page_num > 1 %}
+        <a href="{{ url_for('main.menu', page_num=page_num - 1) }}">Previous</a>
+        {% endif %}
+
+        <span>Page {{ page_num }} of {{ total_pages }}</span>
+
+        {% if page_num < total_pages %}
+        <a href="{{ url_for('main.menu', page_num=page_num + 1) }}">Next</a>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

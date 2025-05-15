@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %} MediCart {% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+   <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/productlist.css') }}">
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/orders.css') }}">`
+
+
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="containerr">
+        <img src="https://via.placeholder.com/40?text=M" alt="MediCart Logo" class="rounded-circle" width="40" height="40" />
+      <a class="navbar-brand" href="{{ url_for('main.home') }}">Medicart</a>
+      <div>
+          {%if current_user.is_authenticated%}
+                    <a href="{{ url_for('main.home') }}" class="btn btn-outline-primary rounded-pill">Home</a>
+                    {%if total_count%}
+                    <a href="{{ url_for('main.cart') }}" class="btn btn-outline-primary rounded-pill">Cart<sup>{{total_count}}</sup></a>
+                    {%else%}
+                    <a href="{{ url_for('main.cart') }}" class="btn btn-outline-primary rounded-pill">Cart<sup>0</sup></a>
+                    {%endif%}
+                     <a href="{{ url_for('main.account') }}" class="btn btn-outline-primary rounded-pill">Profile</a>
+                     <a href="{{ url_for('main.logout') }}" class="btn btn-outline-primary rounded-pill">Logout</a>
+          {%else%}
+
+        <a href="{{ url_for('auth.newlogin') }}" class="btn btn-outline-primary rounded-pill">Login</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary rounded-pill">Register</a>
+          {%endif%}
+      </div>
+    </div>
+  </nav>
+  <div class="container mt-4">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-success" role="alert">
+          {{ messages[0] }}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; MediCart 2025</span>
+                    </div>
+                </div>
+            </footer>
+</body>
+</html>

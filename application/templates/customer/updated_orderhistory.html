@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block title %}Order History - MediCart {% endblock %}
+{% block content %}
+   <section class="order-list" id="active-orders">
+
+            {%for order in orders%}
+            <div class="order-card">
+                <h3>Order ID: {{order.order_id}}</h3>
+
+                <p>Dest: {{order.location}}</p>
+                <p>Order Date:{{order.create_at.strftime('%Y - %m - %d @ %H:%M')}}</p>
+            </div>
+            {%endfor%}
+            <!-- Repeat order-card for more orders -->
+        </section>
+{% endblock %}

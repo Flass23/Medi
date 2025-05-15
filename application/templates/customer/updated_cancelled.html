@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block title %}Cancelled Orders - MediCart {% endblock %}
+{% block content %}
+ <main>
+
+        <div class="order-filters">
+            <button type="submit" class="btn chat-btn" onclick="window.location.href='{{ url_for('main.myorders')}}'">Active/Pending Orders</button>
+            <button onclick="window.location.href='{{ url_for('main.completed_order') }}'">Order History</button>
+            <button  class="btn chat-btn" onclick="window.location.href='{{ url_for('main.cancelled_orders') }}'">Cancelled Order</button>
+        </div>
+
+        <!-- Active Orders -->
+        <section class="order-list" id="active-orders">
+            {%if not order%}
+            <div class="order-card">
+                <p> You have no cancelled orders </p>
+            </div>
+            {%else%}
+            {%for order in order%}
+            <div class="order-card">
+                <h3>Order ID: {{order.order_id}}</h3>
+                <p>Status: {{order.status}}</p>
+                <p>Dest: {{order.location}}</p>
+                <p>Order Date:{{order.create_at.strftime('%Y - %m - %d @ %H:%M')}}</p>
+            </div>
+            {%endfor%}
+            {%endif%}
+            <!-- Repeat order-card for more orders -->
+        </section>
+
+
+    </main>
+
+{% endblock %}

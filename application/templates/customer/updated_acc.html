@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block title %}Profile - MediCart {% endblock %}
+{% block content %}
+                <div class="form-container">
+                <p><img src="{{url_for('static', filename='css/images/profiles/' + current_user.image_file)}}"/>
+                           </p>
+            <form method = 'POST' action="" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        <fieldset>
+                            <div class = "form-group">
+                                {{form.picture.label}}
+                                {{form.picture(class="form-control")}}
+                                {% for error in form.picture.errors %}
+                                 <small class="form-text text-danger">{{ error }}</small>
+                               {% endfor %}
+                            </div>
+                            <div>
+                            {{form.submit(class='btn')}}
+                        </div>
+            </fieldset>
+            </form>
+                </div>
+{% endblock %}

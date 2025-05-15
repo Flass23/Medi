@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block title %}MediCare Landing Page{% endblock %}
+{% block content %}
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/678904ce825083258e066642/1ihnjlinu';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+ <main>
+        <div class="order-filters">
+            <button type="submit" class="btn chat-btn" onclick="window.location.href='{{ url_for('main.myorders')}}'">Active/Pending Orders</button>
+            <button onclick="window.location.href='{{ url_for('main.completed_order') }}'" class="btn chat-btn">Order History</button>
+            <button  class="btn chat-btn" onclick="window.location.href='{{ url_for('main.cancelled_orders') }}'">Cancelled Order</button>
+        </div>
+        <!-- Active Orders -->
+        <section class="order-list" id="active-orders">
+            {%for order in order%}
+            <div class="order-card">
+                <h3>Order ID: {{order.order_id}}</h3>
+                <p>Status: {{order.status}}</p>
+                <p>Dest: {{order.location}}</p>
+                <p>Order Date:{{order.create_at.strftime('%Y - %m - %d @ %H:%M')}}</p>
+            </div>
+            {%endfor%}
+            <!-- Repeat order-card for more orders -->
+        </section>
+    </main>
+{%endblock%}
+
+
