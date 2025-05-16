@@ -1,6 +1,15 @@
 {% extends "layout.html" %}
 {% block title %}Menu - MediCart {% endblock %}
 {% block content %}
+        <div class="search-bar">
+                       <form id='searchForm' action="{{ url_for('main.search', page_num=1) }}" method="post">
+            {{ form2.hidden_tag() }}
+            {{form2.keyword}}
+          <button type="submit" id="searchButton">
+            <i class="fas fa-search"></i> <!-- Font Awesome search icon -->
+        </button>
+            </form>
+        </div>
 <div class="container">
      <div class="d-flex justify-content-between mb-4">
         <h1>Pharmacy Store - Products</h1>

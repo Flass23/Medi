@@ -1,12 +1,58 @@
 {% extends "layout.html" %}
 {% block title %}Profile - MediCart {% endblock %}
 {% block content %}
+    <style>
+        .navbar-brand img {
+            height: 40px;
+            margin-right: 10px;
+        }
+        .profile-section {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+        }
+        .profile-section img {
+            height: 60px;
+            width: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+        .nav-item {
+            margin-left: 1rem;
+        }
+    </style>
+
                 <div class="form-container">
-                <p><img src="{{url_for('static', filename='css/images/profiles/' + current_user.image_file)}}"/>
-                           </p>
+               <li class="nav-item profile-section">
+                        <img src="{{url_for('static', filename='css/images/profiles/' + current_user.image_file)}}" alt="User Profile"/>
+                        <span>{{ current_user.username }}</span>
+                    </li>
             <form method = 'POST' action="" enctype="multipart/form-data">
                         {{ form.hidden_tag() }}
+
                         <fieldset>
+                       <div class = "form-group">
+                                {{form.username.label}}
+                                {{form.username(class="form-control")}}
+                                {% for error in form.username.errors %}
+                                 <small class="form-text text-danger">{{ error }}</small>
+                               {% endfor %}
+                            </div>
+                            <div class = "form-group">
+                                {{form.firstName.label}}
+                                {{form.firstName(class="form-control")}}
+                                {% for error in form.firstName.errors %}
+                                 <small class="form-text text-danger">{{ error }}</small>
+                               {% endfor %}
+                            </div>
+                            <div class = "form-group">
+                                {{form.Email.label}}
+                                {{form.Email(class="form-control")}}
+                                {% for error in form.Email.errors %}
+                                 <small class="form-text text-danger">{{ error }}</small>
+                               {% endfor %}
+                            </div>
                             <div class = "form-group">
                                 {{form.picture.label}}
                                 {{form.picture(class="form-control")}}

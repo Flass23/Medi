@@ -73,7 +73,7 @@ class User(UserMixin, db.Model):
         try:
             data = s.loads(token)
         except:
-            return Fals
+            return False
         if data.get('confirm') != self.id:
             return False
         self.confirmed = True

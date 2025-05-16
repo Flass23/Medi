@@ -200,6 +200,10 @@ def addorder(total_amount):
         db.session.commit()
 
         total_amount = 0
+        if not cart:
+            flash("Can not add order, cart empty")
+            return redirect(url_for('main.home'))
+
         for item in cart.cart_items:
             order_item = OrderItem(order_id=neworder.id, product_id=item.product.id, product_name=item.product.productname,
                                    product_price=item.product.price, quantity=item.quantity)
