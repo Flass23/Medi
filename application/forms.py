@@ -7,6 +7,19 @@ from wtforms.validators import DataRequired, Length
 
 class UpdateForm(FlaskForm):
     picture = FileField('Profile Picture')
+    username = StringField("Username",
+                           validators=[DataRequired(), Length(min=3, max=18)])
+    firstName = StringField('Firstname',
+                            validators=[DataRequired(),
+                                        Length(min=2, max=16)])
+    lastName = StringField('Lastname',
+                           validators=[DataRequired(),
+                                       Length(min=2, max=16)])
+
+    Email = StringField('Email',
+                        validators=[DataRequired(),
+                                    Length(min=5, max=30)])
+
     submit = SubmitField('Update')
 
 class Search(FlaskForm):

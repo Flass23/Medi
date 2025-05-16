@@ -22,12 +22,14 @@
       <div>
           {%if current_user.is_authenticated%}
                     <a href="{{ url_for('main.home') }}" class="btn btn-outline-primary rounded-pill">Home</a>
+                    <a href="{{ url_for('main.menu', page_num=1) }}" class="btn btn-outline-primary rounded-pill">Menu</a>
                     {%if total_count%}
                     <a href="{{ url_for('main.cart') }}" class="btn btn-outline-primary rounded-pill">Cart<sup>{{total_count}}</sup></a>
                     {%else%}
                     <a href="{{ url_for('main.cart') }}" class="btn btn-outline-primary rounded-pill">Cart<sup>0</sup></a>
                     {%endif%}
                      <a href="{{ url_for('main.account') }}" class="btn btn-outline-primary rounded-pill">Profile</a>
+
                      <a href="{{ url_for('main.logout') }}" class="btn btn-outline-primary rounded-pill">Logout</a>
           {%else%}
 

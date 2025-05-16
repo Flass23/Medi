@@ -21,7 +21,7 @@
       <div class="containerr">
         <h1 class="display-4 fw-bold">Medicart. Delivered.</h1>
         <p class="lead mt-3">MediCart helps you browse, order, and receive medications from trusted pharmacies right at your doorstep in Lesotho.</p>
-        <a href="cart.html" class="btn btn-outline-primary rounded-pill">Order Now</a>
+        <a href="{{url_for('main.cart')}}" class="btn btn-outline-primary rounded-pill">Order Now</a>
       </div>
     </section>
 
@@ -58,7 +58,7 @@
       <div class="container">
         <h2>Start Your Journey with MediCart</h2>
         <p class="mb-4">Safe, convenient, and reliable access to your medications—anytime, anywhere in Lesotho.</p>
-        <a href="register.html" class="btn btn-outline-primary rounded-pill">Create an Account</a>
+        <a href="{{url_for('auth.register')}}" class="btn btn-outline-primary rounded-pill">Create an Account</a>
       </div>
     </section>
   </main>
