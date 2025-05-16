@@ -51,8 +51,8 @@ def send_email(form):
     msg = Message('Confirm Email', sender='pitechcorp7@gmail.com', recipients=[form.Email.data])
     link = url_for('auth.confirm_email', token=token, _external=True)
     msg.subject = "Email confirmation"
-    msg.body = ('Your email was recently used to sign up for VitalWay Pharmacy, if you didnt do this ignore '
-                'this email, But if you did.'
+    msg.body = ('Your email was recently used to sign up for MediCart, if it was not you simply ignore this email'
+                ', But if you did.'
                 'The next step is to click the following link to check if Your your email real/ '
                 'link is {}. We are really glad you choose us.').format(
         link)
@@ -65,8 +65,9 @@ def send_email(form):
         print(e)
     except Exception as e:
         flash("Failed to send email due to unexpected error.")
-        print('error 2')
+
         print(e)
+        return redirect(url_for("auth.login"))
     return token
 
 
