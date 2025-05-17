@@ -186,7 +186,6 @@ def confirm_email(token):
             user.confirmed = True
             flash('Account was successfully confirmed')
             # Log the user in (if necessary)
-            login_user(user)
             return redirect(url_for('auth.newlogin'))
         else:
             flash('Something went wrong. User not found.')
