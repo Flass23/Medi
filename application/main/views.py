@@ -9,7 +9,7 @@ from ..forms import *
 from ..models import *
 
 
-PRODUCTS_PER_PAGE = 12
+PRODUCTS_PER_PAGE = 9
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -139,7 +139,8 @@ def search(page_num):
     keyword = form2.keyword.data
     products = Product.query.filter(
         Product.productname.like(f'%{keyword}%') |
-        Product.description.like(f'%{keyword}%')
+        Product.description.like(f'%{keyword}%')  |
+        Product.category.like(f'%{keyword}%')
     ).all()
     start = (page_num - 1) * PRODUCTS_PER_PAGE
     end = start + PRODUCTS_PER_PAGE
@@ -171,6 +172,9 @@ def addorder(total_amount):
     tyt = total_amount
     print(tyt)
     user = User.query.filter_by(id = current_user.id).first()
+    if not cart:
+
+        return redirect(url_for('main.menu'))
 
     existing_order = Order.query.filter_by(user_id=current_user.id, status='Pending').first()
     if existing_order:
@@ -200,10 +204,7 @@ def addorder(total_amount):
         db.session.commit()
 
         total_amount = 0
-        if not cart:
-            flash("Can not add order, cart empty")
-            return redirect(url_for('main.home'))
-
+        
         for item in cart.cart_items:
             order_item = OrderItem(order_id=neworder.id, product_id=item.product.id, product_name=item.product.productname,
                                    product_price=item.product.price, quantity=item.quantity)
@@ -217,11 +218,13 @@ def addorder(total_amount):
             price=i.product.price, quantity=i.quantity, user_id=neworder.user_id, date_=neworder.create_at)
             product = Product.query.filter_by(id=i.product.id).first()
             if product:
-                if product.quantity > 0:
+                if product.quantity < 0:
+                    flash(f'Product {product.productname} is low on quantity')
+                    redirect(url_for('main.cart'))
+                else:
                     product.quantity -= i.quantity
                     db.session.add(product)
-                else:
-                    redirect(url_for('main.cart'))
+
 
             db.session.add(sale)
             points_earned = calculate_loyalty_points(user, total_amount)
@@ -323,7 +326,7 @@ def account():
         image_file = save_update_profile_picture(form.picture.data)
         current_user.image_file = image_file
         db.session.commit()
-        flash("Account Details Updated sucessfully.", "success")
+        flash("Account Details Updated Successfully.", "success")
         return redirect(url_for('main.account'))
 
     image_file = url_for('static', filename='static/images/profiles/ ' + user.image_file)

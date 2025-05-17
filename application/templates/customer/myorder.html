@@ -12,12 +12,12 @@ s1.setAttribute('crossorigin','*');
 s0.parentNode.insertBefore(s1,s0);
 })();
 </script>
- <main>
-        <div class="order-filters">
-            <button type="submit" class="btn chat-btn" onclick="window.location.href='{{ url_for('main.myorders')}}'">Active/Pending Orders</button>
-            <button onclick="window.location.href='{{ url_for('main.completed_order') }}'" class="btn chat-btn">Order History</button>
-            <button  class="btn chat-btn" onclick="window.location.href='{{ url_for('main.cancelled_orders') }}'">Cancelled Order</button>
-        </div>
+
+    
+        <button type="submit" class="btn btn-outline-primary rounded-pill" onclick="window.location.href='{{ url_for('main.myorders')}}'">Active/Pending Orders</button>
+        <button onclick="window.location.href='{{ url_for('main.completed_order') }}'" class="btn btn-outline-primary rounded-pill">Order History</button>
+        <button  class="btn btn-outline-primary rounded-pill" onclick="window.location.href='{{ url_for('main.cancelled_orders') }}'">Cancelled Order</button>
+        
         <!-- Active Orders -->
         <section class="order-list" id="active-orders">
             {%for order in order%}
@@ -30,7 +30,7 @@ s0.parentNode.insertBefore(s1,s0);
             {%endfor%}
             <!-- Repeat order-card for more orders -->
         </section>
-    </main>
+
 {%endblock%}
 
 
