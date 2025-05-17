@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
 {% block title %}Cancelled Orders - MediCart {% endblock %}
 {% block content %}
- <main>
 
-        <div class="order-filters">
+
+
             <button type="submit" class="btn btn-outline-primary rounded-pill" onclick="window.location.href='{{ url_for('main.myorders')}}'">Active/Pending Orders</button>
             <button class='btn btn-outline-primary rounded-pill' onclick="window.location.href='{{ url_for('main.completed_order') }}'">Order History</button>
             <button  class="btn btn-outline-primary rounded-pill" onclick="window.location.href='{{ url_for('main.cancelled_orders') }}'">Cancelled Order</button>
-        </div>
+
 
         <!-- Active Orders -->
         <section class="order-list" id="active-orders">
