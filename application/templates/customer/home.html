@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
-{% block title %}Dashboard - MediCart {% endblock %}
+{% block title %}Home - MediCart {% endblock %}
 {% block content %}
+
+
 <script type="text/javascript">
 var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
 (function(){
@@ -12,6 +14,7 @@ s1.setAttribute('crossorigin','*');
 s0.parentNode.insertBefore(s1,s0);
 })();
 </script>
+
 <div>
   <h2 class="text-primary">{{current_user.firstname}}'s Dashboard</h2>
   <div class="row my-4">
@@ -19,9 +22,21 @@ s0.parentNode.insertBefore(s1,s0);
       <div class="card border-primary mb-3">
         <div class="card-header bg-primary text-white">Loyalty Points</div>
         <div class="card-body">
-          <h5 class="card-title">{{current_user.loyalty_points}} points</h5>
-          <p class="card-text">Redeem your points for discounts! <br/>
-          40 points are equivalent to M1. You can redeem from 200 points</p>
+          <h5 class="card-title">{{current_user.loyalty_points}} points with MediCart</h5>
+          <p class="card-text">Redeem your points for exclusive rewards! <br/>
+            <ul>
+              <li> 
+                You can start redeeming at 300 points
+              </li>
+              <li>
+                150 points = 1 free delivery
+              </li>
+              <li>
+                Earn more to unlock bigger discounts. <br>
+                Save them or spend them - the choice is yours!
+              </li>
+            </ul>
+          </p>
         </div>
       </div>
     </div>

@@ -1,18 +1,23 @@
 {% extends "layout.html" %}
-{% block title %}Menu - MediCart {% endblock %}
+{% block title %} {{pharmacy.name}} Menu at- MediCart {% endblock %}
 {% block content %}
         <div class="search-bar">
-                       <form id='searchForm' action="{{ url_for('main.search', page_num=1) }}" method="post">
+            <form id='searchForm' action="{{ url_for('main.search', page_num=1) }}" method="post">
             {{ form2.hidden_tag() }}
-            {{form2.keyword}}
-          <button type="submit" id="searchButton">
-            <i class="fas fa-search"></i> <!-- Font Awesome search icon -->
-        </button>
-            </form>
+
+            <div class="input-group">
+                {{form2.keyword(class='form-control bg-light border-0 small')}}
+                <div class="input-group-append">
+                  <button class="btn btn-primary" type="submit">
+                  <i class="fas fa-search fa-sm"></i>
+              </button>
+            </div>
+        </div>
+    </form>
         </div>
 
      <div class="d-flex justify-content-between mb-4">
-        <h1>MediCart - Products</h1>
+        <h1>{{pharmacy.name}} - Products</h1>
 
     </div>
 

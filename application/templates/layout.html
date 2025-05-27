@@ -3,16 +3,81 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %} MediCart {% endblock %}</title>
+  <title>{% block title %} {{pharmacy.name}} {% endblock %}</title>    <link href="{{url_for('static', filename='css/fontawesome-free/css/all.min.css')}}" rel="stylesheet" type="text/css">
+  <link href="{{url_for('static', filename='css/all.min.css')}}" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+      rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/productlist.css') }}">
- <link rel="stylesheet" href="{{ url_for('static', filename='css/orders.css') }}">`
-
-
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/orders.css') }}">
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebars.css') }}">
 </head>
+<style>
+  .dropdown{
+    postion:relative;
+    display:inline-block;
+  }
+  .dropbtn{
+    background-color:#4CAF50;
+    color:white;
+    padding:10px;
+    border:none;
+    cursor:pointer;
+
+  }
+  .dropdown-content{
+    display:none;
+    postion:absolute;
+    background-color:#f1f1f1;
+    min-width:160px;
+    z-index:1;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0,2);
+  }
+  .dropdown-content a{
+    color:black;
+    padding:10px 2px;
+    text-decoration: none;
+    display:block;
+  }
+
+  .dropdown a:hover{background:#ddd;}
+
+  .show{
+    display:block;
+  }
+
+</style>
 <body>
+  <script>
+
+function toggleDropdown(){
+  document.getElementById("dropdownContent").classList.toggle("show");
+}
+window.onclick = function(event){
+  if (!event.target.matches('.btn btn-outline-primary rounded-pill')) {
+
+    let dropdowns = document.getElementByClassName("dropdown-content");
+    for( let i = 0; i < dropdowns.length; i++){
+      dropdowns[i].classList.remove("show");
+
+    }
+  }
+} 
+function playsound(){
+  const audio = document.getElementById('notifsound');
+  if (audio){
+    audio.play();
+  }
+}
+{%if new_notification%}
+      playsound();
+    {%endif%}
+
+  </script>
+  <audio id="notifsound" src="{{url_for('static', filename='notify.m4a')}}" preload="auto"></audio>
+
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="containerr">
           <a class="navbar-brand d-flex align-items-center" href="{{url_for('main.home')}}">
@@ -21,6 +86,8 @@
         </a>
       <div>
           {%if current_user.is_authenticated%}
+   
+     
                     <a href="{{ url_for('main.home') }}" class="btn btn-outline-primary rounded-pill">Home</a>
                     <a href="{{ url_for('main.menu', page_num=1) }}" class="btn btn-outline-primary rounded-pill">Menu</a>
                     {%if total_count%}
@@ -29,12 +96,32 @@
                     <a href="{{ url_for('main.cart') }}" class="btn btn-outline-primary rounded-pill">Cart<sup>0</sup></a>
                     {%endif%}
                      <a href="{{ url_for('main.account') }}" class="btn btn-outline-primary rounded-pill">Profile</a>
-
                      <a href="{{ url_for('main.logout') }}" class="btn btn-outline-primary rounded-pill">Logout</a>
-          {%else%}
+                     <div class=dropdown>
+                    
+                      <form action="{{url_for('main.set_pharmacy')}}" method="POST">
 
-        <a href="{{ url_for('auth.newlogin') }}" class="btn btn-outline-primary rounded-pill">Login</a>
-        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary rounded-pill">Register</a>
+                        {{formpharm.hidden_tag()}}
+            
+                        {{formpharm.pharmacy.label}}
+
+                            <div class="input-group">
+                              {{formpharm.pharmacy(class='form-control bg-light border-0 small')}}
+                              <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-search fa-sm"></i>
+                            </button>
+                              </div>
+                          </div>
+                        
+
+                    </form>
+                    </div>
+                     {%else%}
+
+        <a href="{{url_for('auth.newlogin')}}" class="btn btn-outline-primary rounded-pill">Login</a>
+        <a href="{{url_for('auth.register',Options=1)}}" class="btn btn-outline-primary rounded-pill">Register Personal Account</a>
+        <a href="{{url_for('auth.registerpharmacy')}}" class="btn btn-outline-primary rounded-pill">Register Pharmacy</a>
           {%endif%}
       </div>
     </div>
@@ -56,5 +143,8 @@
                     </div>
                 </div>
             </footer>
+            <script src="{{url_for('static', filename='sidebars.js')}}">
+
+            </script>
 </body>
 </html>

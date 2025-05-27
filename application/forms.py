@@ -1,8 +1,20 @@
-from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, FloatField, PasswordField, SubmitField, BooleanField, TextAreaField, IntegerField,SelectField
-from wtforms.validators import DataRequired, Length
+from flask_wtf import FlaskForm # type: ignore
+from flask_wtf.file import FileField, FileAllowed # type: ignore
+from wtforms import StringField, HiddenField,FloatField, PasswordField, SubmitField, BooleanField, TextAreaField, IntegerField,SelectField # type: ignore
+from wtforms.validators import DataRequired, Length, Email # type: ignore
 
+class PharmacyRegistrationForm(FlaskForm):
+    pharmacy_name = StringField('Pharmacy Name', validators=[DataRequired()])
+    licence_number = StringField('Licence Number', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired()])
+    phone = StringField('Phone Number', validators=[DataRequired()])
+    address = StringField('Address', validators=[DataRequired()])
+    opening_hours_and_days = StringField('Opening Hours', validators=[DataRequired()])
+    lat = FloatField('Latitude')
+    lon = FloatField('Longitude')
+    password = PasswordField('Password', validators=[DataRequired()])
+    
+    submit = SubmitField('Register Pharmacy')
 
 
 class UpdateForm(FlaskForm):
@@ -36,8 +48,7 @@ class RegistrationForm(FlaskForm):
     lastName = StringField('Lastname',
                            validators=[DataRequired(),
                                        Length(min=2, max=16)])
-    option = BooleanField("Admin?")
-
+    
     Email = StringField('Email',
                         validators=[DataRequired(),
                                     Length(min=5, max=30)])
@@ -46,6 +57,10 @@ class RegistrationForm(FlaskForm):
                              validators=[DataRequired()])
 
     submit = SubmitField('Register')
+
+class Set_PharmacyForm(FlaskForm):
+    pharmacy = SelectField('Choose Pharmacy', choices=[], coerce=int, validators=[DataRequired()], default=-1)
+    submit = SubmitField('Continue')
 
 
 
@@ -94,11 +109,12 @@ class update(FlaskForm):
 
 
 class confirmpurchase(FlaskForm):
-    payment = SelectField("Payment Method", validators=[DataRequired()], choices=[('Cash', 'Cash'), ('Mpesa', 'Mpesa'),
-                                                                                  ('Ecocash', 'Ecocash')])
-    transid = StringField('TransactionID')
-    drop_address = StringField('Address For Collection/Pick Up')
-
+    payment = SelectField("Payment Method", validators=[DataRequired()], choices=[('Mpesa', 'Mpesa'), ('Ecocash', 'Ecocash')])
+    transid = StringField('Enter your Mpesa/Ecocash Transaction ID')
+    payment_number = StringField('Phone Number Used for payment')
+    latitude = HiddenField('Latitude')
+    logitude = HiddenField('Logitude')
+    drop_address = StringField('Delivery Address (be specific as possible - room number, village, landmarks, nearby places))')
     submit = SubmitField("Buy Cart")
 
 
@@ -124,10 +140,16 @@ class ProductForm(FlaskForm):
 
 
 class updatestatusform(FlaskForm):
-    status = SelectField('Status', validators=[DataRequired()], choices=[('Completed', 'Completed'),
-                                                                         ('Approved', 'Approved'), ('Cancelled', 'Cancelled')])
+    status = SelectField('Status', validators=[DataRequired()], choices=[('Approved', 'approved'),
+                                                                        ('Ready ', 'ready'),
+                                                                        ('Out for Deliver', 'Out for delivery'), 
+                                                                        ('Delivered', 'Delivered'),
+                                                                        ('Cancelled', 'cancelled')])
     submit = SubmitField('Update Status')
 
 
+class verifydelivery(FlaskForm):
+    proof = FileField('Upload Photo of Customer', validators=[FileAllowed(['jpg', 'jpeg', 'png'])])
+    Submit = SubmitField('Verify')
 
 

@@ -24,8 +24,12 @@
                 </div>
                 <button type="submit" class="btn btn-outline-primary rounded-pill">Login</button>
                 <div class="form-switch">
- <p class="mt-3">New to the platform? <a href="{{ url_for('auth.register') }}">Register Now</a></p>
+ <p class="mt-3">New to the platform? <a href="{{ url_for('auth.register', Options=1) }}">Register Your Customer Account Now</a></p>
                    </div>
+
+                  <div class="form-switch">
+                    <p class="mt-3">Haven't register your pharmacy yet? <a href="{{ url_for('auth.register', Options=0) }}">Register Now</a></p>
+                 </div>
             </form>
         </div>
     </section>

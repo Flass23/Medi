@@ -3,7 +3,12 @@
 {% block content %}
 <div class="containerr">
     <h1>{{current_user.username}}'s Cart</h1>
+    {% if not cart.cart_items%}
+    <div class="cart-summary">
+        <p>Cart is Empty</p>
+    {%else%}
     <div class="cart">
+
         <table>
             <thead>
                 <tr>
@@ -14,7 +19,6 @@
                 </tr>
             </thead>
             {%for items in cart.cart_items%}
-            {%if items%}
             <tbody id="cart-items">
                 <!-- Items will be dynamically added here -->
             <td>{{items.product.productname}}</td>
@@ -28,42 +32,57 @@
                 </form>
             </td>
             </tbody>
-            {%else%}
-
-                    <div class="cart-summary">
-                        <p>Cart is Empty</p>
         </div>
-            {%endif%}
-            {%endfor%}
+            {%endfor%}    
         </table>
-        <div class="cart-summary">
-            <p>Total Price: M<span id="total-price">{{total_amount}}</span> includes Delivery Fees</p>
-        </div>
-        <form action="{{url_for('main.addorder',total_amount=total_amount)}}" method="POST">
-                    {{form3.csrf_token}}
-                    <div class="form-group">
-                        {{form3.payment.label}}
-                        {{form3.payment(class='form-control')}}
-                    </div>
-                    <div class="form-group">
-                        {{form3.drop_address.label}}
-                        {{form3.drop_address(class='form-control')}}
-                    </div>
-                        <div class="form-group">
-                        {{form3.transid.label}}
-                        {{form3.transid(class='form-control')}}
-                    </div>
-        <div class="button-container">
-            <!-- Shop Button -->
-
-  <button type="submit" class="btn btn-light btn-sm"
-          onclick="window.location.href='{{ url_for('main.addorder', total_amount=total_amount)}}'">Add Order
-  </button>
-
-        </div>
-
-                </form>
     </div>
-</div>
+    <div class="cart-summary">
+        <p>Total Price: M<span id="total-price">{{total_amount}}</span> includes Delivery Fees</p>
+    </div>
+    <form action="{{url_for('main.addorder',total_amount=total_amount)}}" method="POST">
+                {{form3.csrf_token}}
+                <div class="form-group">
+                    {{form3.payment.label}}
+                    {{form3.payment(class='form-control')}}
+                </div>
+                <div class="form-group">
+                    {{form3.payment_number.label}}
+                    {{form3.payment_number(class='form-control')}}
+                </div>
+                <div class="form-group">
+                    {{form3.transid.label}}
+                    {{form3.transid(class='form-control')}}
+                </div>
+                <div class="form-group">
+                    {{form3.drop_address.label}}
+                    {{form3.drop_address(class='form-control')}}
+                </div>
+                    {{form.latitude()}}
+                    {{form.logitude()}}
+                    <button onclick="getLocation()"> 
+                        Use your Current Location as Destination Address(recommended)
+                    </button>
+    <div class="button-container">
+        <!-- Shop Button -->
 
+<button type="submit" class="btn btn-light btn-sm"
+      onclick="window.location.href='{{ url_for('main.addorder', total_amount=total_amount)}}'">Add Order
+</button>
+
+    </div>
+
+            </form>
+
+    {%endif%}
+            </div>
+</div>
+<script>
+    function getLocation(){
+        navigator.geolocation.getCurrentPosition(function(pos) {
+            document.getElementById('logitude').value = pos.coords.longitude;
+            document.getElementById('latitude').value = pos.coords.latitude;
+            document.getElementById('address').value = 'Lat: $ {pos.coords.latitude}. Lng:${pos.coords.longitude}';
+        });
+    }
+    </script>
 {% endblock %}

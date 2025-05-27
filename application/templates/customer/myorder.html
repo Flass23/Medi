@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block title %}MediCare Landing Page{% endblock %}
+{% block title %}My Orders - Medicart{% endblock %}
 {% block content %}
 <script type="text/javascript">
 var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
@@ -25,7 +25,8 @@ s0.parentNode.insertBefore(s1,s0);
                 <h3>Order ID: {{order.order_id}}</h3>
                 <p>Status: {{order.status}}</p>
                 <p>Dest: {{order.location}}</p>
-                <p>Order Date:{{order.create_at.strftime('%Y - %m - %d @ %H:%M')}}</p>
+                <p>Source: {{order.source_pharmacy}}</p>
+                <p>Order Date: {{order.create_at.strftime('%Y - %m - %d @ %H:%M')}}</p>
             </div>
             {%endfor%}
             <!-- Repeat order-card for more orders -->

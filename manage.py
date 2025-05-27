@@ -1,10 +1,10 @@
 import os
 from application import create_app, db
 from application.models import User
-from flask_migrate import Migrate
+from flask_migrate import Migrate   # type: ignore
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError
-from livereload import Server
+from livereload import Server   # type: ignore
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 
@@ -17,6 +17,6 @@ def make_shell_context():
 
 
 if __name__ == '__main__':
-    server = Server(app.wsgi_app)
-    server.serve(port=8080, host='0.0.0.0')
-    #app.run(host='0.0.0.0', port=8080)
+    #server = Server(app.wsgi_app)
+    #server.serve(port=8000, host='0.0.0.0')
+    app.run(host='0.0.0.0', port=8000, debug=True)

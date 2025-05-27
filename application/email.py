@@ -1,5 +1,5 @@
 from threading import Thread
-from flask_mail import Message
+from flask_mail import Message # type: ignore
 
 from flask import current_app, render_template
 
