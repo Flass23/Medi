@@ -1,0 +1,19 @@
+{% extends "adminlayout.html" %}
+{% block title %}{{pharmacy.name}} Order Details View - MediCart {% endblock %}
+{% block content %}
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+  />
+  <style>
+    #map { height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>
+
+{%endblock%}

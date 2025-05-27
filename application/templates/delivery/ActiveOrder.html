@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Deliveries</title>
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h2>My Delivery Routes</h2>
+    <div id="map"></div>
+
+    <script>
+        function initMap() {
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 10,
+                center: { lat: -29.609, lng: 28.233 } // Default center
+            });
+
+            const deliveries = {{ deliveries | tojson }};
+            const waypoints = deliveries.map(d => ({
+                location: new google.maps.LatLng(d.latitude, d.longitude),
+                stopover: true
+            }));
+
+            const directionsService = new google.maps.DirectionsService();
+            const directionsRenderer = new google.maps.DirectionsRenderer({ map });
+
+            if (waypoints.length < 2) {
+                // Single delivery
+                new google.maps.Marker({
+                    position: waypoints[0].location,
+                    map,
+                    title: deliveries[0].customer_name
+                });
+                map.setCenter(waypoints[0].location);
+            } else {
+                directionsService.route({
+                    origin: waypoints[0].location,
+                    destination: waypoints[waypoints.length - 1].location,
+                    waypoints: waypoints.slice(1, -1),
+                    optimizeWaypoints: true,
+                    travelMode: google.maps.TravelMode.DRIVING
+                }, (result, status) => {
+                    if (status === "OK") {
+                        directionsRenderer.setDirections(result);
+                    } else {
+                        alert("Could not display route: " + status);
+                    }
+                });
+            }
+        }
+    </script>
+
+    <!-- Load the Google Maps JavaScript API -->
+    <script async
+        src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap">
+    </script>
+</body>
+</html>

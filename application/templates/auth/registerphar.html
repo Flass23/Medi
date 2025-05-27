@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% block title %}Register your Pharmacy - MediCart{% endblock %}
+{% block content %}
+
+<div class="text-center">
+    <h4>Pharmacy Registration</h4>
+    <p class="text-muted">Fill in the details below to register your pharmacy.</p>
+</div>
+<form action="{{ url_for('auth.registerpharmacy') }}" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.pharmacy_name.label(class="form-label") }}
+        {{ form.pharmacy_name(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.licence_number.label(class="form-label") }}
+        {{ form.licence_number(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.email.label(class="form-label") }}
+        {{ form.email(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.phone.label(class="form-label") }}
+        {{ form.phone(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.address.label(class="form-label") }}
+        {{ form.address(class="form-control") }}
+    </div>
+
+    <div class="form-group">
+        {{ form.opening_hours_and_days.label(class="form-label") }}
+        {{ form.opening_hours_and_days(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.password.label(class="form-label") }}
+        {{ form.password(class="form-control") }}
+    </div>
+
+
+    <button type="submit" class="btn btn-primary w-100">Register Pharmacy</button>
+</form>
+<script>
+    navigator.geolocation.getCurrentPositoin((position)=>{
+        document.getElementById('latitude').value = position.coords.latitude;
+        document.getElementById('longitude').value = position.coords.longitude;
+    }, 
+    (error) => {
+        alert("Location access required to register your pharmacy");
+    });
+</script>
+{%endblock content%}

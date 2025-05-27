@@ -1,0 +1,52 @@
+{% extends "adminlayout.html" %}
+{% block title %}{{pharmacy.name}} Product List - MediCart {% endblock %}
+{% block content %}
+
+<section class="orders-section">
+    <table class="orders-table">
+  <thead>
+    <tr>
+      <th>Product Id</th>
+      <th>Product Name</th>
+      <th>Description</th>
+        <th>Quantity</th>
+      <th>Price</th>
+        <th>Category</th>
+      <th>Product Level Status</th>
+        <th>Action</th>
+    </tr>
+  </thead>
+     {%for product in product%}
+  <tbody>
+
+  <!-- Add more rows as needed -->
+  <td>{{product.id}}</td>
+  <td>{{product.productname}}</td>
+  <td>{{product.description}}</td>
+  <td>{{product.quantity}}</td>
+  <td>{{product.price}}</td>
+  <td>{{product.category}}</td>
+  <td>{{product.warning}}</td>
+  <td>
+      <form action="{{url_for('pharmacy.add_products', item_id=product.id)}}" method="POST">
+         <button value={{product.id}} class='btn' type="submit">+
+         </button>
+      </form>
+
+      <form action="{{url_for('pharmacy.remove_from_products', item_id=product.id)}}" method="POST">
+         <button value={{product.id}} class='btn' type="submit">-
+         </button>
+      </form>
+
+      <form action="{{url_for('pharmacy.updateproduct', item_id=product.id)}}" method="POST">
+         <button value={{product.id}} class='btn' type="submit">Modify
+         </button>
+      </form>
+  </td>
+
+  </tbody>
+    {%endfor%}
+</table>
+</section>
+
+{%endblock%}

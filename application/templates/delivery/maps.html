@@ -1,0 +1,62 @@
+{% extends "deliverylayout.html" %}
+{% block title %} MediCart Delivery Dashboard{% endblock %}
+{% block content %}
+
+<button type="submit" class="btn btn-outline-primary rounded-pill" onclick="window.location.href='{{ url_for('main.myorders')}}'">Active Deliveries</button>
+<button onclick="window.location.href='{{ url_for('main.completed_order') }}'" class="btn btn-outline-primary rounded-pill">Delivery History</button>
+<button  class="btn btn-outline-primary rounded-pill" onclick="window.location.href='{{ url_for('main.cancelled_orders') }}'">Cancelled Deliveries</button>
+
+<!-- Active Orders -->
+<h1>Delivery Team Dashboard</h1>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Status</th>
+            <th>Address</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.id }}</td>
+            <td>{{ order.customer }}</td>
+            <td>{{ order.status }}</td>
+            <td>{{ order.address }}</td>
+            <td>
+                {% if order.status == 'Ready' %}
+                    <form method="post" action="/delivery/take/{{ order.id }}">
+                        <button type="submit">Take Order</button>
+                    </form>
+                {% elif order.status == 'On Delivery' %}
+                    <span>In Progress</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    const map = L.map('map').setView([-29.31, 27.48], 13); // Default center (Lesotho)
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Simulated positions
+    const customer = L.marker([-29.305, 27.485]).addTo(map).bindPopup("Customer");
+    const pharmacy = L.marker([-29.31, 27.48]).addTo(map).bindPopup("Pharmacy");
+    const deliveryGuy = L.marker([-29.312, 27.475], { draggable: true }).addTo(map).bindPopup("You (Delivery)");
+
+    // Fit bounds
+    const group = L.featureGroup([customer, pharmacy, deliveryGuy]);
+    map.fitBounds(group.getBounds());
+</script>
+
+{% endblock %}
