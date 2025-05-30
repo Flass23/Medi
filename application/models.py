@@ -98,7 +98,6 @@ class Sales(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     pharmacy_id = db.Column(db.Integer, db.ForeignKey('pharmacy.id', name='fk_pharmact_id'), nullable=False)
 
-
 class User(UserMixin, db.Model):
     __searchable__ = ['username', 'firstname', 'email', 'lastname']
     id = db.Column(db.Integer, primary_key=True)
