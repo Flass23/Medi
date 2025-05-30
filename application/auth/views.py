@@ -288,7 +288,7 @@ def confirm_email(token):
         return render_template('auth/email/confirm_email.html')
 
     # In case no valid user is found or other errors
-    return render_template('auth/email/confirm_email.html')
+    return render_template('auth/newlogin.html')
 
 
 @auth.route('/unconfirmed')
