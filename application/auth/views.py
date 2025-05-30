@@ -144,7 +144,7 @@ def registerpharmacy():
                         flash('An email was sent to you email account.', 'success')
                         return redirect(url_for('auth.unconfirmed', token=token))
                 except IntegrityError:
-                    #ddd
+
                     db.session.rollback()
                     flash('Check you input the correct details.')
                     return redirect(url_for('auth.registerpharmacy'))
