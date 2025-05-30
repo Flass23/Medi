@@ -114,6 +114,8 @@ class confirmpurchase(FlaskForm):
     payment_number = StringField('Phone Number Used for payment')
     latitude = HiddenField('Latitude')
     logitude = HiddenField('Logitude')
+    payment_screenshot = FileField('Upload Product Picture', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'gif'])])
+
     drop_address = StringField('Delivery Address (be specific as possible - room number, village, landmarks, nearby places))')
     submit = SubmitField("Buy Cart")
 
@@ -140,16 +142,21 @@ class ProductForm(FlaskForm):
 
 
 class updatestatusform(FlaskForm):
-    status = SelectField('Status', validators=[DataRequired()], choices=[('Approved', 'approved'),
-                                                                        ('Ready ', 'ready'),
-                                                                        ('Out for Deliver', 'Out for delivery'), 
+    status = SelectField('Status', validators=[DataRequired()], choices=[('Approved', 'Approved'),
+                                                                        ('Ready ', 'Ready'),
+                                                                        ('Out for Deliver', 'Out for Delivery'), 
                                                                         ('Delivered', 'Delivered'),
-                                                                        ('Cancelled', 'cancelled')])
+                                                                        ('Cancelled', 'Cancelled')])
     submit = SubmitField('Update Status')
 
 
-class verifydelivery(FlaskForm):
-    proof = FileField('Upload Photo of Customer', validators=[FileAllowed(['jpg', 'jpeg', 'png'])])
-    Submit = SubmitField('Verify')
+class updatedeliveryform(FlaskForm):
+    status = SelectField('Status', validators=[DataRequired()], choices=[ ('Delivered', 'Delivered'),
+                                                                        ('Cancelled', 'Cancelled')])
+    delivery_prove = FileField('Customer Photo With their Order',
+                               validators=[FileAllowed(['jpg', 'jpeg', 'png'])])
+    submit = SubmitField('Update Delivery Status')
+
+
 
 

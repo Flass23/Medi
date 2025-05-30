@@ -14,7 +14,8 @@
  <link rel="stylesheet" href="{{ url_for('static', filename='css/orders.css') }}">
  <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebars.css') }}">
  <link rel="stylesheet" href="/static/style.css">
- <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+ <link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet" />
+
 
 </head>
 <style>
@@ -94,18 +95,17 @@ window.onclik = function(event){
           {%if current_user.is_authenticated%}
    
      
-                    <a href="{{ url_for('main.home') }}" class="btn btn-outline-primary rounded-pill">Home</a>
-                    <a href="{{ url_for('main.menu', page_num=1) }}" class="btn btn-outline-primary rounded-pill">Menu</a>
+                    <a href="{{ url_for('delivery.mydeliveries') }}" class="btn btn-outline-primary rounded-pill">My Deliveries</a>
+                    
                     {%if total_count%}
-                    <a href="{{ url_for('main.cart') }}" class="btn btn-outline-primary rounded-pill">Cart<sup>{{total_count}}</sup></a>
+                    <a href="{{ url_for('delivery.dashboard') }}" class="btn btn-outline-primary rounded-pill">New Orders<sup>{{total_count}}</sup></a>
                     {%else%}
-                    <a href="{{ url_for('main.cart') }}" class="btn btn-outline-primary rounded-pill">Cart<sup>0</sup></a>
+                    <a href="{{ url_for('delivery.dashboard') }}" class="btn btn-outline-primary rounded-pill">New Orders<sup>0</sup></a>
                     {%endif%}
-                     <a href="{{ url_for('main.account') }}" class="btn btn-outline-primary rounded-pill">Profile</a>
                      <a href="{{ url_for('main.logout') }}" class="btn btn-outline-primary rounded-pill">Logout</a>
                      <div class=dropdown>
                     
-                      <form action="{{url_for('main.set_pharmacy')}}" method="POST">
+                      <form action="{{url_for('delivery.set_pharmacy')}}" method="POST">
 
                         {{formpharm.hidden_tag()}}
             
@@ -152,5 +152,8 @@ window.onclik = function(event){
             <script src="{{url_for('static', filename='sidebars.js')}}">
 
             </script>
+            <script src="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
+
+
 </body>
 </html>

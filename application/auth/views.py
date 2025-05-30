@@ -75,7 +75,7 @@ def load_user(user_id):
         return Pharmacy.query.get(int(user_id))
     elif user_type == 'customer':
         return User.query.get(int(user_id))
-    elif user_type == 'delivery':
+    elif user_type == 'delivery_guy':
         return DeliveryGuy.query.get(int(user_id))
     return None                                                                                                                                 
 

@@ -25,6 +25,7 @@ def get_orderid():
 
 
 class Pharmacy(UserMixin, db.Model):
+    __tablename__ = "pharmacy"
     __searchable__ = ['name', 'address']
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
@@ -56,6 +57,7 @@ class Pharmacy(UserMixin, db.Model):
     products = db.relationship('Product', backref='pharmacy', lazy=True)
     orders = db.relationship('Order', backref='pharmacy', lazy=True)
     sales = db.relationship('Sales', backref='pharmacy', lazy=True)
+    users = db.relationship('User', back_populates='pharmacy')
 
     def __init__(self, name, licence_num, password, email, phone, address, openinghours):
         self.name = name
@@ -79,7 +81,7 @@ class Product(db.Model):
     order_items = db.relationship('OrderItem', backref='product', lazy=True)
     warning = db.Column(db.String(50), default='quantity good')
     category = db.Column(db.String(50), nullable=True, default='Uncategorized')
-    pharmacy_id = db.Column(db.Integer, db.ForeignKey('pharmacy.id', name='fk_pharmacy_id'), nullable=False)
+    pharmacy_id = db.Column(db.Integer, db.ForeignKey('pharmacy.id'))
 
 
 
@@ -110,8 +112,8 @@ class User(UserMixin, db.Model):
     orders = db.relationship('Order', backref='user', lazy=True)
     confirmed = db.Column(db.Boolean, nullable=False, default=False)
     loyalty_points = db.Column(db.Integer, default=0)
-    pharmacy_id = db.Column(db.ForeignKey('pharmacy.id', name='fk_pharmacy'))
-
+    pharmacy_id = db.Column(db.Integer, db.ForeignKey('pharmacy.id'))
+    pharmacy = db.relationship('Pharmacy', back_populates='users')
 
     def generate_confirmation_token(self, expiration=4600):
         s = TimedSerializer(current_app.config['SECRET_KEY'], expiration)
@@ -162,6 +164,7 @@ class Order(db.Model):
     taken_by = db.Column(db.Integer, db.ForeignKey('deliveryguy.id', name='fk_pharma_order_deliver'))
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
+    screenshot = db.Column(db.String(120))
 
     def get_localTime(self):
         return self.create_at.astimezone(ZoneInfo("Africa/Johannesburg"))
@@ -176,7 +179,6 @@ class Cart(db.Model):
     date_created = db.Column(db.DateTime, default=get_localTime)
     cart_items = db.relationship('CartItem', backref='cart', lazy=True)
     pharmacy_id = db.Column(db.Integer, db.ForeignKey('pharmacy.id', name='fk_pharma_order'), nullable=False)
-
     def calculate_total(self):
        return self.order_items.product_price * self.order_items.quantity
 
@@ -206,7 +208,7 @@ class Delivery(db.Model):
     status = db.Column(db.String(50), default='Out for delivery')
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
-    order_id = db.Column(db.Integer, db.ForeignKey('order.id', name='fk_delivery_order'))
+    order_id = db.Column(db.String(30), db.ForeignKey('order.id', name='fk_delivery_order'))
     orders = db.relationship('Order', backref='delivery', lazy=True)
     delivery_guy_id = db.Column(db.Integer, db.ForeignKey('deliveryguy.id', name='fk_delivery_guy'))
     delivery_guy = db.relationship('DeliveryGuy', back_populates='deliveries', overlaps='deliveries', lazy=True)

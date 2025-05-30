@@ -7,7 +7,7 @@ from sqlalchemy import desc, or_
 from . import main
 from ..forms import *
 from ..models import *
-
+from PIL import Image
 
 PRODUCTS_PER_PAGE = 9
 
@@ -26,6 +26,38 @@ def calculate_loyalty_points(user, sale_amount):
 
     db.session.commit()
     return points_earned
+
+def save_product_picture(file):
+    # Set the desired size for resizing
+    size = (300, 300)
+
+    # Generate a random hex string for the filename
+    random_hex = secrets.token_hex(9)
+
+    # Get the file extension
+    _, f_ex = os.path.splitext(file.filename)
+
+    # Generate the final filename (random + extension)
+    post_img_fn = random_hex + f_ex
+
+    # Define the path to save the file (UPLOAD_PRODUCTS should be configured in your Flask app)
+    post_image_path = os.path.join(current_app.root_path, current_app.config['UPLOAD_PAYMENT_PROOF'], post_img_fn)
+
+    try:
+        # Open the image
+        img = Image.open(file)
+
+        # Resize the image to fit within the size (thumbnail)
+        img.thumbnail(size)
+
+        # Save the resized image
+        img.save(post_image_path)
+
+        return post_img_fn  # Return the filename to store in the database
+    except Exception as e:
+        # If an error occurs during image processing, handle it
+        print(f"Error saving image: {e}")
+        return None
 
 def save_update_profile_picture(form_picture):
     random_hex = secrets.token_hex(9)
@@ -119,7 +151,6 @@ def cart():
     form = CartlistForm()
     form2 = removefromcart()
     form3 = confirmpurchase()
-    orderform = orderform()
     formpharm = Set_PharmacyForm()
     formpharm.pharmacy.choices=[(-1, "Select a Pharmacy")] + [(p.id, p.name) for p in Pharmacy.query.all()]
     pharmacy_id = session.get('pharmacy_id')
@@ -234,7 +265,8 @@ def addorder(total_amount):
         neworder = Order(user_id=current_user.id, payment=form.payment.data,
                             user_email=current_user.email, location=form.drop_address.data, pharmacy_id=pharm.id, 
                             source_pharmacy=pharm.name, logitude=form.logitude.data, latitude=form.latitude.data)
-        
+        pics = save_product_picture(form.payment_screenshot.data)
+        neworder.screenshot = pics
         
         #hashed_order = flask_bcrypt.generate_password_hash(neworder.id)
         if form.transid.data:
@@ -247,6 +279,7 @@ def addorder(total_amount):
         try:
             print('committing...')
             db.session.commit()
+            flash('Order successfully placed Order. Your payment will be verified shortly')
         except IntegrityError:
             db.session.rollback()
             flash('Happened again')

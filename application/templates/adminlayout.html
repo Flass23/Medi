@@ -72,19 +72,19 @@
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="{{url_for('pharmacy.ActiveOrders')}}">
-                    <i class="fas fa-fw fa-cog"></i>
+                    <i class="fas fa-spinner"></i>
                     <span>Active Orders</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link collapsed" href="{{url_for('pharmacy.delivered_orders')}}" >
-                    <i class="fas fa-fw fa-cog"></i>
+                    <i class="fas fa-check-circle"></i>
                     <span>Complete Orders</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link collapsed" href="{{url_for('pharmacy.cancelled_orders')}}" >
-                    <i class="fas fa-fw fa-cog"></i>
+                    <i class="fas fa-times-circle"></i>
                     <span>Cancelled Orders</span>
                 </a>
             </li>
@@ -96,13 +96,13 @@
             </div>
             <li class="nav-item">
                 <a class="nav-link collapsed" href="{{url_for('pharmacy.products')}}" >
-                    <i class="fas fa-fw fa-cog"></i>
+                    <i class="fas fa-th-list"></i>
                     <span>View Products</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link collapsed" href="{{url_for('pharmacy.addproducts')}}" >
-                    <i class="fas fa-fw fa-cog"></i>
+                    <i class="fas fa-plus-circle"></i>
                     <span>Add Products</span>
                 </a>
 
@@ -117,7 +117,7 @@
             <!-- Nav Item - Charts -->
             <li class="nav-item">
                       <a class="nav-link collapsed" href="{{url_for('pharmacy.top_selling')}}" >
-                    <i class="fas fa-fw fa-cog"></i>
+                    <i class="fas fa-chart-line"></i>
                     <span>Charts </span>
                 </a>
             </li>
@@ -131,14 +131,14 @@
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="{{url_for('pharmacy.addproducts')}}" >
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>Add Pharmacy User</span>
+                    <i class="fas fa-user-plus"></i>
+                    <span>Add Stuff</span>
                 </a>
 
             </li>
             <li class="nav-item">
                 <a class="nav-link collapsed" href="{{url_for('pharmacy.addproducts')}}" >
-                    <i class="fas fa-fw fa-cog"></i>
+                    <i class="fas fa-edit"></i>
                     <span>Update Pharmacy Details</span>
                 </a>
 
@@ -149,8 +149,8 @@
 
             <li class="nav-item">
                 <a class="nav-link collapsed" href="{{url_for('main.logout')}}" >
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>LogOut</span>
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
                 </a>
 
             </li>
@@ -164,7 +164,9 @@
 
             <!-- Main Content -->
             <div id="content">
-
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
                 <!-- Topbar -->
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
@@ -223,7 +225,6 @@
                         </li>
 
                     </ul>
-
                 </nav>
 
                     <div class="row">

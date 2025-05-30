@@ -1,0 +1,48 @@
+{% extends "deliverylayout.html" %}
+{% block title %}{{current_user.firstname}} Delivery Stats - MediCart {% endblock %}
+<style>
+    .dashboard{
+    max_width:400px;
+    margin:auto;
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+    }
+    h2{
+    text-align:center;
+    color:#1a73e8;
+    }
+    .stat {
+    background:#e7f0fd;
+    margin: 15px 0;
+    padding:15px;
+    border-radius:8px;
+    text-align:center;
+    font-size:18px;
+    }
+    .label{
+    font-weight:bold;
+    margin-top:5px;
+    color:#1a73e8;
+    }
+</style>
+{% block content %}
+<div class="stat">
+    <div class="label">Total Deliveries (current month)</div>
+    <div class="value">{{140}}</div>
+</div>
+<div class="stat">
+    <div class="label">Total Earnings (current month)</div>
+    <div class="value">M{{14000}}</div>
+</div>
+<div class="stat">
+    <div class="label">Efficiency</div>
+    <div class="value">{{140%}}</div>
+</div>
+
+<div class="stat">
+    <div class="label">Customer Rating</div>
+    <div class="value">{{4.9}} <i class="fas fa-star" style="color: gold;"></i></div>
+</div>
+{%endblock%}

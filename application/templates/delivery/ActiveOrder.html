@@ -1,63 +1,39 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>My Deliveries</title>
-    <style>
-        #map {
-            height: 500px;
-            width: 100%;
-        }
-    </style>
-</head>
-<body>
-    <h2>My Delivery Routes</h2>
-    <div id="map"></div>
+{% extends "deliverylayout.html" %}
+{% block title %}{{pharmacy.name}} Order Details View - MediCart {% endblock %}
+{% block content %}
+<h1>{{current_user.names}} Deliveries</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Address</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for delivery in deliveries %}
+            <tr>
+                <td>{{ delivery.order_id }}</td>
+                <td>{{ delivery.customer_name }}</td>
+                <td>{{ delivery.status }}</td>
+                <td>{{ delivery.address }}</td>
+                <td>
+                <form action="{{url_for('delivery.update_delivery', delivery_id=delivery.id)}}" method="POST">
+                        {{ myform.hidden_tag() }}
+                        <div class="form-group">
+                       {{myform.status(class='form-control')}}
+                       {{myform.delivery_prove.label}}
+                       {{myform.delivery_prove(class='form-control')}}
+                       {{myform.submit(class='btn btn-outline-primary rounded-pill')}}
+                        </div>
+                </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-    <script>
-        function initMap() {
-            const map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 10,
-                center: { lat: -29.609, lng: 28.233 } // Default center
-            });
+{%endblock%}
 
-            const deliveries = {{ deliveries | tojson }};
-            const waypoints = deliveries.map(d => ({
-                location: new google.maps.LatLng(d.latitude, d.longitude),
-                stopover: true
-            }));
-
-            const directionsService = new google.maps.DirectionsService();
-            const directionsRenderer = new google.maps.DirectionsRenderer({ map });
-
-            if (waypoints.length < 2) {
-                // Single delivery
-                new google.maps.Marker({
-                    position: waypoints[0].location,
-                    map,
-                    title: deliveries[0].customer_name
-                });
-                map.setCenter(waypoints[0].location);
-            } else {
-                directionsService.route({
-                    origin: waypoints[0].location,
-                    destination: waypoints[waypoints.length - 1].location,
-                    waypoints: waypoints.slice(1, -1),
-                    optimizeWaypoints: true,
-                    travelMode: google.maps.TravelMode.DRIVING
-                }, (result, status) => {
-                    if (status === "OK") {
-                        directionsRenderer.setDirections(result);
-                    } else {
-                        alert("Could not display route: " + status);
-                    }
-                });
-            }
-        }
-    </script>
-
-    <!-- Load the Google Maps JavaScript API -->
-    <script async
-        src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap">
-    </script>
-</body>
-</html>

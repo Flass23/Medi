@@ -25,7 +25,7 @@ class DevelopmentConfig(Config):
     MAIL_PASSWORD = 'rljm azij wply ihrp'
     UPLOAD_PATH = 'static/css/images/profiles/'
     UPLOAD_PRODUCTS = 'static/css/images/products/'
-
+    UPLOAD_DELIVERY = 'static/css/images/delivery/'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
                               'sqlite:///' + os.path.join(basedir, 'data-dev.sqlite.db')
 
