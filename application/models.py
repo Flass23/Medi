@@ -58,6 +58,7 @@ class Pharmacy(UserMixin, db.Model):
     orders = db.relationship('Order', backref='pharmacy', lazy=True)
     sales = db.relationship('Sales', backref='pharmacy', lazy=True)
     users = db.relationship('User', back_populates='pharmacy')
+    confirmed = db.Column(db.Boolean, nullable=False, default=False)
 
     def __init__(self, name, licence_num, password, email, phone, address, openinghours):
         self.name = name

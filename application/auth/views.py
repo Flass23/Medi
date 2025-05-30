@@ -42,18 +42,49 @@ def addpharma(form):
                 openinghours=form.opening_hours_and_days.data,
                 password=hashed_password)
     return pharma
+def send_email_(form):
+    token = s.dumps(form.Email.data)
+    msg = Message('Confirm Email', sender='pitechcorp7@gmail.com', recipients=[form.Email.data])
+    link = url_for('auth.confirm_email', token=token, _external=True)
+    msg.subject = "Confirm your MediCart pharmacy account"
+    msg.body = (
+        "Hello,\n\n"
+        "Thank you for registering your pharmacy with MediCart.\n\n"
+        "To complete your registration and activate your account, please confirm your email address by clicking the link below:\n\n"
+        "{}\n\n"
+        "If you did not initiate this registration, you can safely ignore this email.\n\n"
+        "We look forward to helping you connect with more customers and streamline your operations.\n\n"
+        "Best regards,\n"
+        "The MediCart Team"
+    ).format(link)
+
+    try:
+        mail.send(msg)
+        print("message sent")
+    except SMTPAuthenticationError as e:
+        print('error 1')
+        flash("Failed to send email: Authentication Error. Check your email/password settings.")
+        print(e)
+    except Exception as e:
+        flash("Failed to send email due to unexpected error.")
+        print(e)
+        return redirect(url_for("auth.newlogin"))
+    return token
 
 
 def send_email(form):
     token = s.dumps(form.Email.data)
     msg = Message('Confirm Email', sender='pitechcorp7@gmail.com', recipients=[form.Email.data])
     link = url_for('auth.confirm_email', token=token, _external=True)
-    msg.subject = "Email confirmation"
-    msg.body = ('Your email was recently used to sign up for MediCart, if it was not you simply ignore this email'
-                ', But if you did.'
-                'The next step is to click the following link to check if Your your email real/ '
-                'link is {}. We are really glad you choose us.').format(
-        link)
+    msg.subject = "Confirm your MediCart email"
+    msg.body = (
+        "Hi there,\n\n"
+        "We noticed your email was recently used to sign up for MediCart. If this wasn't you, feel free to ignore this message.\n\n"
+        "If you did sign up, please confirm your email address by clicking the link below:\n\n"
+        "{}\n\n"
+        "Thanks for choosing MediCart — we're excited to have you on board!\n\n"
+        "The MediCart Team"
+    ).format(link)
     try:
         mail.send(msg)
         print("message sent")
@@ -95,11 +126,13 @@ def registerpharmacy():
                     db.session.commit()
                     #check if pharmacy successfully committed
                     reg_pharma = Pharmacy.query.filter_by(email=form.email.data).first()
-                    if reg_pharma:
+                    if reg_pharma and reg_pharma.confirmed:
                         flash('Account added successfully, login and fill further business details')
                         return redirect(url_for('auth.newlogin'))
                     else:
-                        flash('There was an error creating your account. We are working on on this. Try again later.')
+                        token = send_email_(form)
+                        flash('An email was sent to you email account.', 'success')
+                        return redirect(url_for('auth.unconfirmed', token=token))
                 except IntegrityError:
                     db.session.rollback()
                     flash('Check you input the correct details.')
@@ -189,12 +222,21 @@ def newlogin():
     return render_template('auth/newlogin.html', form=form, formpharm=formpharma)
 
 
-def confirm_token(token, expiration=3600):
+from itsdangerous import SignatureExpired, BadSignature
+
+def confirm_token(token, expiration=86400):
     try:
         email = s.loads(token, max_age=expiration)
         return email
-    except Exception:
+    except SignatureExpired:
+        # Token is valid but expired
+        print("Token expired.")
         return False
+    except BadSignature:
+        # Token is invalid
+        print("Invalid token.")
+        return False
+
 
 
 from flask import flash, redirect, url_for, render_template
@@ -210,6 +252,8 @@ def confirm_email(token):
 
         # Find the user by email (no need to use user_id separately)
         user = User.query.filter_by(email=email).first()
+        pham = Pharmacy.query.filter_by(email=email).first()
+
 
         if user:
             # Mark the user as confirmed
@@ -217,6 +261,9 @@ def confirm_email(token):
             flash('Account was successfully confirmed')
             # Log the user in
             return redirect(url_for('auth.newlogin'))
+        elif pham:
+            pham.confirmed = True
+            flash('Account was successfully confirmed')
         else:
             flash('User not found.')
             print('Something went wrong: User not found.')
