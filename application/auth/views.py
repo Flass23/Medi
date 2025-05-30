@@ -1,4 +1,5 @@
 from flask import render_template, redirect, url_for, session, request, flash, current_app
+from werkzeug.exceptions import InternalServerError
 from werkzeug.security import generate_password_hash, check_password_hash
 from ..models import User, Pharmacy, DeliveryGuy
 from flask_bcrypt import Bcrypt # type: ignore
@@ -43,20 +44,29 @@ def addpharma(form):
                 password=hashed_password)
     return pharma
 def send_email_(form):
-    token = s.dumps(form.Email.data)
-    msg = Message('Confirm Email', sender='pitechcorp7@gmail.com', recipients=[form.Email.data])
-    link = url_for('auth.confirm_email', token=token, _external=True)
-    msg.subject = "Confirm your MediCart pharmacy account"
-    msg.body = (
-        "Hello,\n\n"
-        "Thank you for registering your pharmacy with MediCart.\n\n"
-        "To complete your registration and activate your account, please confirm your email address by clicking the link below:\n\n"
-        "{}\n\n"
-        "If you did not initiate this registration, you can safely ignore this email.\n\n"
-        "We look forward to helping you connect with more customers and streamline your operations.\n\n"
-        "Best regards,\n"
-        "The MediCart Team"
-    ).format(link)
+    try:
+        token = s.dumps(form.email.data)
+        msg = Message('Confirm Email', sender='pitechcorp7@gmail.com', recipients=[form.Email.data])
+        link = url_for('auth.confirm_email', token=token, _external=True)
+        msg.subject = "Confirm your MediCart pharmacy account"
+        msg.body = (
+            "Hello,\n\n"
+            "Thank you for registering your pharmacy with MediCart.\n\n"
+            "To complete your registration and activate your account, please confirm your email address by clicking the link below:\n\n"
+            "{}\n\n"
+            "If you did not initiate this registration, you can safely ignore this email.\n\n"
+            "We look forward to helping you connect with more customers and streamline your operations.\n\n"
+            "Best regards,\n"
+            "The MediCart Team"
+        ).format(link)
+    except InternalServerError:
+        print('error 1')
+        flash("Failed to send email due to unexpected error.")
+        return redirect(url_for("auth.newlogin"))
+    except InterruptedError:
+        print('error 1')
+        flash("Failed to send email due to unexpected error.")
+        return redirect(url_for("auth.newlogin"))
 
     try:
         mail.send(msg)
