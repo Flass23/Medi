@@ -46,7 +46,7 @@ def addpharma(form):
 def send_email_(form):
     try:
         token = s.dumps(form.email.data)
-        msg = Message('Confirm Email', sender='pitechcorp7@gmail.com', recipients=[form.Email.data])
+        msg = Message('Confirm Email', sender='pitechcorp7@gmail.com', recipients=[form.email.data])
         link = url_for('auth.confirm_email', token=token, _external=True)
         msg.subject = "Confirm your MediCart pharmacy account"
         msg.body = (
