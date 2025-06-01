@@ -21,7 +21,7 @@ mail = Mail()
 
 
 
-def adduser(form, option):
+def adduser(form):
     hashed_password = bcrypt.generate_password_hash(form.Password.data).decode('utf-8')
     user = User(username=form.username.data,
                         firstname=form.firstName.data,
