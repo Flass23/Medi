@@ -124,7 +124,7 @@ def pharmacy_order_alerts():
         .order_by(Order.create_at.desc()).first()
 
     latest_ready = Order.query.filter_by(pharmacy_id=pharmacy_id, status='Ready') \
-        .order_by(Order.update_at.desc()).first()
+        .order_by(Order.create_at.desc()).first()
 
     response = {}
 

@@ -71,7 +71,7 @@ def save_update_profile_picture(form_picture):
 @main.route('/check_order_updates', methods=['GET'])
 @login_required
 def check_order_updates():
-    latest_order = Order.query.filter_by(user_id=current_user.id).order_by(Order.update_at.desc()).first()
+    latest_order = Order.query.filter_by(user_id=current_user.id).order_by(Order.create_at.desc()).first()
 
     if latest_order and latest_order.status == "Approved":
         return jsonify({'status': 'approved', 'order_id': latest_order.id})

@@ -41,13 +41,5 @@
 
     <button type="submit" class="btn btn-primary w-100">Register Pharmacy</button>
 </form>
-<script>
-    navigator.geolocation.getCurrentPosition((position)=>{
-        document.getElementById('latitude').value = position.coords.latitude;
-        document.getElementById('longitude').value = position.coords.longitude;
-    }, 
-    (error) => {
-        alert("Location access required to register your pharmacy");
-    });
-</script>
+
 {%endblock content%}
