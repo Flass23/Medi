@@ -88,7 +88,7 @@ def send_email(form):
     link = url_for('auth.confirm_email', token=token, _external=True)
     msg.subject = "Confirm your MediCart email"
     msg.body = (
-        "Hi {{form.username.data}},\n\n"
+        f"Hi {form.username.data},\n\n"
         "We noticed your email was recently used to sign up for MediCart. If this wasn't you, feel free to ignore this message.\n\n"
         "If you did sign up, please confirm your email address by clicking the link below:\n\n"
         "{}\n\n"
