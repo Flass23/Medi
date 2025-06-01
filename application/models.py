@@ -28,7 +28,7 @@ class Pharmacy(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    phone = db.Column(db.String(20), nullable=False)
+    phone = db.Column(db.String(50), nullable=False)
     address = db.Column(db.String(200))
     licence_num = db.Column(db.String(120), unique=True, nullable=False)
     openinghours = db.Column(db.String(100), nullable=False, default='09:00 to 18:30')
