@@ -140,15 +140,11 @@ def pharmacy_order_alerts():
 @login_required
 #@role_required('Pharmacy')
 def adminpage():
-    #analysis
     mypharmacy = Pharmacy.query.get_or_404(current_user.id)
-    # query the data
+    #query the data
     today = datetime.today()
-
     current_month = today.month
     current_year = today.year
-    sales = Sales.query.filter(Sales.pharmacy_id==current_user.id).all()
-    hsales = [sale.price * sale.quantity for sale in sales]
     # Calculate the start of the current month (first day of the month)
     start_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
@@ -176,40 +172,38 @@ def adminpage():
     ## MoM Growth rate
 
     total_annual_sales = db.session.query(func.sum(Sales.price * Sales.quantity)) \
-        .filter(Sales.date_ >= start_of_year, Sales.date_ <= end_of_year,
-                Sales.pharmacy_id == session.get('pharmacy_id')).scalar()
+        .filter(Sales.date_ >= start_of_year, Sales.date_ <= end_of_year, Sales.pharmacy_id == session.get('pharmacy_id') ).scalar()
     total_annual_sales = total_annual_sales if total_annual_sales else 0.00
 
     # Query to calculate total sales in the current month
     total_sales = db.session.query(func.sum(Sales.price * Sales.quantity)) \
-        .filter(Sales.date_ >= start_of_month, Sales.date_ <= end_of_month,
-                Sales.pharmacy_id == session.get('pharmacy_id')) \
+        .filter(Sales.date_ >= start_of_month, Sales.date_ <= end_of_month, Sales.pharmacy_id == session.get('pharmacy_id') ) \
         .scalar()
-    min_value = min(hsales)
-    max_value = max(hsales)
+
     # If no sales are found, return 0
     total_sales = total_sales if total_sales else 0.0
+
+
 
     if prev_monthly_sales > 0:
         mom_growth = ((total_sales - prev_monthly_sales) / prev_monthly_sales) * 100
     else:
         mom_growth = 100
 
-    results = (db.session.query(Product.productname,
-                                func.sum(OrderItem.quantity * OrderItem.product_price).label('total Revenue')
+    results = (db.session.query(Product.productname, func.sum(OrderItem.quantity*OrderItem.product_price).label('total Revenue')
                                 )
                .join(Product, Product.id == OrderItem.product_id)
                .group_by(Product.productname)
-               .order_by(func.sum(OrderItem.quantity * OrderItem.product_price).desc())
-               .filter(Product.pharmacy_id == session.get('pharmacy_id'))).all()
+               .order_by(func.sum(OrderItem.quantity*OrderItem.product_price).desc())
+               .filter(Product.pharmacy_id==session.get('pharmacy_id'))).all()
 
-    # separate the results into two lists for plotting
+    #separate the results into two lists for plotting
 
     product_names = [row[0] for row in results]
 
     revenues = [float(row[1]) for row in results]
 
-    # create a bar chart using plotly
+    #create a bar chart using plotly
 
     bar = go.Bar(x=product_names, y=revenues, text=revenues, textposition='outside')
     layout = go.Layout(title="Top-Selling Products by revenue")
@@ -231,7 +225,6 @@ def adminpage():
     line = go.Scatter(x=dates, y=totals, mode='lines+markers')
     layout1 = go.Layout(title="monthly sales over time", xaxis=dict(title='Month'), yaxis=dict(title='Total Sales'))
     fig1 = go.Figure(data=[line], layout=layout1)
-    fig1.update_layout(yaxis=dict(range=[min_value -10, max_value + 10]))
     chart_div1 = plot.plot(fig1, include_plotlyjs=True, output_type='div')
 
     results2 = (
@@ -248,67 +241,18 @@ def adminpage():
 
     chart_div2 = plot.plot(fig2, include_plotlyjs=True, output_type='div')
 
-    ##candle sticks
-    daily_sales = (
-        db.session.query(
-            func.date(Sales.date_).label('sale_date'),
-            func.sum(Sales.price).label('daily_total')
-        ).group_by(func.date(Sales.date_))
-        .order_by(func.date(Sales.date_)).filter(Sales.pharmacy_id == mypharmacy.id).all()
-    )
-
-    if not daily_sales:
-        flash('There is no data yet')
-        return redirect(url_for('pharmacy.adminpage'))
-
-    pending_orders = len(Order.query.filter(
-        extract('month', Order.create_at) == current_month,
-        extract('year', Order.create_at) == current_year,
-        (Order.status == "Pending"), (Order.pharmacy_id == mypharmacy.id)).all())
-    if not pending_orders:
-        pending_orders = 0
-
-   #analysis
-    mypharmacy = Pharmacy.query.get_or_404(session.get('pharmacy_id'))
-
-    today = datetime.today()
-    current_month = today.month
-    current_year = today.year
-    start_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-
-    # Calculate the end of the current month (last day of the month)
-    next_month = today.replace(day=28) + timedelta(days=4)  # this gets us to the next month
-    end_of_month = next_month.replace(day=1) - timedelta(days=1)  # last day of the current month
-    end_of_month = end_of_month.replace(hour=23, minute=59, second=59, microsecond=999999)
-    # Get today's date
-
-    # Calculate the start of the current month (first day of the month)
-    total_sales = 0
-    # If no sales are found, return 0
-    total_sales = db.session.query(func.sum(Sales.price * Sales.quantity)) \
-        .filter(Sales.date_ >= start_of_month, Sales.date_ <= end_of_month, Sales.pharmacy_id == session.get('pharmacy_id') ) \
-        .scalar()
-
-
-    total_sales = total_sales if total_sales else 0.0
     pending_orders = len(Order.query.filter(
         extract('month', Order.create_at) == current_month,
         extract('year', Order.create_at) == current_year,
         (Order.status == "Pending"), (Order.pharmacy_id==mypharmacy.id)).all())
     if not pending_orders:
         pending_orders = 0
-    username = current_user.name
     pharmacy_id = session.get('pharmacy_id')
     pharmacy = Pharmacy.query.get_or_404(pharmacy_id)
-    if not pharmacy:
-        pharmacy = "Pharmacy not found"
-    return render_template('pharmacy/updated_dashboard.html',chart1=chart_div1 , chart=chart_div,
-                           chart2=chart_div2,
-                           username = username, total_sales=total_sales,
-                           current_year=today.year, current_month=today.strftime('%B'),
-                            pending_orders=pending_orders, pharmacy=pharmacy, 
-                            total_annual_sales=get_annual_sales(session.get('pharmacy_id')), mom_growth = round(get_mom_growth(session.get('pharmacy_id')), 2))
-
+    return render_template('pharmacy/updated_dashboard.html', chart1=chart_div1 , chart=chart_div,
+                           chart2=chart_div2, total_sales=total_sales,
+                           total_annual_sales=get_annual_sales(mypharmacy.id), pending_orders=pending_orders,
+                           pharmacy=pharmacy)
 
 
 @pharmacy.route('/search', methods=['POST', 'GET'])
