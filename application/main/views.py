@@ -1,6 +1,6 @@
 import os
 import secrets
-from flask import render_template, redirect, request, url_for, flash, session
+from flask import render_template, redirect, request, url_for, flash, session, jsonify
 from flask_login import login_required, current_user, logout_user # type: ignore
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc, or_
@@ -66,6 +66,18 @@ def save_update_profile_picture(form_picture):
     post_image_path = os.path.join(current_app.root_path, current_app.config['UPLOAD_PATH'], post_img_Fn)
     form_picture.save(post_image_path)
     return post_img_Fn
+
+
+@main.route('/check_order_updates', methods=['GET'])
+@login_required
+def check_order_updates():
+    latest_order = Order.query.filter_by(user_id=current_user.id).order_by(Order.update_at.desc()).first()
+
+    if latest_order and latest_order.status == "Approved":
+        return jsonify({'status': 'approved', 'order_id': latest_order.id})
+
+    return jsonify({'status': 'none'})
+
 
 @main.route('/order_history')
 @login_required

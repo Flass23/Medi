@@ -110,6 +110,31 @@ def get_mom_growth(pharmacy_id):
     return mom_growth
 
 
+from flask import jsonify
+
+@pharmacy.route('/pharmacy_order_alerts', methods=['GET'])
+@login_required
+def pharmacy_order_alerts():
+    if session.get('user_type') != 'pharmacy':
+        return jsonify({'status': 'unauthorized'}), 403
+
+    pharmacy_id = current_user.id
+
+    latest_pending = Order.query.filter_by(pharmacy_id=pharmacy_id, status='Pending') \
+        .order_by(Order.create_at.desc()).first()
+
+    latest_ready = Order.query.filter_by(pharmacy_id=pharmacy_id, status='Ready') \
+        .order_by(Order.update_at.desc()).first()
+
+    response = {}
+
+    if latest_pending:
+        response['pending_id'] = latest_pending.id
+    if latest_ready:
+        response['ready_id'] = latest_ready.id
+
+    return jsonify(response)
+
 
 @pharmacy.route('/adminpage', methods=["POST", "GET"])
 @login_required
@@ -275,12 +300,15 @@ def adminpage():
     username = current_user.name
     pharmacy_id = session.get('pharmacy_id')
     pharmacy = Pharmacy.query.get_or_404(pharmacy_id)
+    if not pharmacy:
+        pharmacy = "Pharmacy not found"
     return render_template('pharmacy/updated_dashboard.html',chart1=chart_div1 , chart=chart_div,
                            chart2=chart_div2,
                            username = username, total_sales=total_sales,
                            current_year=today.year, current_month=today.strftime('%B'),
                             pending_orders=pending_orders, pharmacy=pharmacy, 
-                            total_annual_sales=get_annual_sales(session.get('pharmacy_id')), mom_growth=round(get_mom_growth('pharmacy_id'), 2))
+                            total_annual_sales=get_annual_sales(session.get('pharmacy_id')), mom_growth = round(get_mom_growth(session.get('pharmacy_id')), 2))
+
 
 
 @pharmacy.route('/search', methods=['POST', 'GET'])

@@ -254,42 +254,38 @@ from flask import flash, redirect, url_for, render_template
 from itsdangerous import SignatureExpired
 from flask_login import login_user # type: ignore
 
+from ..forms import LoginForm, Set_PharmacyForm
 
 @auth.route('/confirm_email/<token>', methods=['GET'])
 def confirm_email(token):
+    form = LoginForm()
+    formpharma = Set_PharmacyForm()
     try:
-        # Decode the token to retrieve the email
         email = s.loads(token, max_age=5000)
-
-        # Find the user by email (no need to use user_id separately)
         user = User.query.filter_by(email=email).first()
         pham = Pharmacy.query.filter_by(email=email).first()
 
-
         if user:
-            # Mark the user as confirmed
             user.confirmed = True
-            flash('Account was successfully confirmed')
-            # Log the user in
-            return redirect(url_for('auth.newlogin'))
+            db.session.commit()
+            flash('Your account has been successfully confirmed. You can now log in.', 'success')
+            return render_template('auth/newlogin.html', form=form, formpharm=formpharma)
+
         elif pham:
             pham.confirmed = True
-            flash('Account was successfully confirmed')
+            db.session.commit()
+            flash('Your pharmacy account has been successfully confirmed. You can now log in.', 'success')
+            return render_template('auth/newlogin.html', form=form, formpharm=formpharma)
+
         else:
-            flash('User not found.')
-            print('Something went wrong: User not found.')
-            return redirect(url_for('auth.register'))  # Redirect to a registration or error page
+            flash('User not found.', 'danger')
+            return redirect(url_for('auth.register'))
 
     except SignatureExpired:
-        return '<h1>The token expired</h1>'  # Show a message if the token is expired
+        return '<h1>The confirmation link has expired.</h1>'
     except Exception as e:
-        flash(f"Error: {str(e)}")
-        print(f"Error: {str(e)}")
-        return render_template('auth/email/confirm_email.html')
-
-    # In case no valid user is found or other errors
-    return render_template('auth/newlogin.html')
-
+        flash(f"Error: {str(e)}", 'danger')
+        return render_template('auth/email/confirmed.html')
 
 @auth.route('/unconfirmed')
 def unconfirmed():
