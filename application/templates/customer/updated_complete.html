@@ -7,10 +7,6 @@
             <button class="btn btn-outline-primary rounded-pill" onclick="window.location.href='{{ url_for('main.completed_order') }}'">Order History</button>
             <button  class="btn btn-outline-primary rounded-pill" onclick="window.location.href='{{ url_for('main.cancelled_orders') }}'">Cancelled Order</button>
 
-
-
-
-
         <!-- Active Orders -->
         <section class="order-list" id="active-orders">
             {%for order in orders%}

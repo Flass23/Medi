@@ -102,7 +102,7 @@
 
         <div class="product-details">
             <div class="price">
-                Price: ${{ product.price }}
+                Price: M{{ product.price }}
             </div>
 
             <form action="{{url_for('add_to_cart', item_id=item.id)}}" method="POST">
