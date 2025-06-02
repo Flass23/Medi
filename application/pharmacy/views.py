@@ -73,28 +73,6 @@ def load_user(user_id):
 
 from flask import jsonify
 
-@pharmacy.route('/pharmacy_order_alerts', methods=['GET'])
-@login_required
-def pharmacy_order_alerts():
-    if session.get('user_type') != 'pharmacy':
-        return jsonify({'status': 'unauthorized'}), 403
-
-    pharmacy_id = current_user.id
-
-    latest_pending = Order.query.filter_by(pharmacy_id=pharmacy_id, status='Pending') \
-        .order_by(Order.create_at.desc()).first()
-
-    latest_ready = Order.query.filter_by(pharmacy_id=pharmacy_id, status='Ready') \
-        .order_by(Order.create_at.desc()).first()
-
-    response = {}
-
-    if latest_pending:
-        response['pending_id'] = latest_pending.id
-    if latest_ready:
-        response['ready_id'] = latest_ready.id
-
-    return jsonify(response)
 
 
 @pharmacy.route('/adminpage', methods=["POST", "GET"])

@@ -65,25 +65,6 @@
     }
   </script>
 
-  <audio id="order-sound" src="{{url_for('static', filename='notify.m4a')}}" preload="auto"></audio>
-  <script>
-    function checkOrderUpdate() {
-      fetch("/check_order_updates")
-        .then(response => response.json())
-        .then(data => {
-          if (data.status === 'approved') {
-            const lastNotified = localStorage.getItem('lastNotifiedOrder');
-            if (lastNotified !== String(data.order_id)) {
-              document.getElementById('order-sound').play();
-              localStorage.setItem('lastNotifiedOrder', data.order_id);
-              location.reload();
-            }
-          }
-        });
-    }
-    setInterval(checkOrderUpdate, 10000);
-  </script>
-
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="containerr">
       <a class="navbar-brand d-flex align-items-center" href="{{url_for('main.home')}}">

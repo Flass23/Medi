@@ -68,18 +68,6 @@ class Pharmacy(UserMixin, db.Model):
         self.password = password
 
 
-def update_warning(self, quantity):
-
-    self.quantity = quantity
-    if quantity < 10:
-
-        db.session.commit()
-        warning = 'low quantity'
-        return warning
-    else:
-        return "good quantity"
-
-
 class Product(db.Model):
     __searchable__ = ['productname', 'description', 'category']
     id = db.Column(db.Integer, primary_key=True)
@@ -90,11 +78,9 @@ class Product(db.Model):
     description = db.Column(db.String(100), nullable=False)
     cart_items = db.relationship('CartItem', backref='product', lazy=True)
     order_items = db.relationship('OrderItem', backref='product', lazy=True)
-    warning = db.Column(db.String(50), default=update_warning(quantity))
+    warning = db.Column(db.String(50), default='quantity good')
     category = db.Column(db.String(50), nullable=True, default='Uncategorized')
     pharmacy_id = db.Column(db.Integer, db.ForeignKey('pharmacy.id'))
-
-
 
 
 
