@@ -20,11 +20,11 @@ def create_app(config_name):
     config[config_name].init_app(app)
     UPLOAD_PATH = 'static/css/images/profiles/'
     UPLOAD_PRODUCTS = 'static/css/images/products/'
-    UPLOAD_PAYMENT_PROOF = 'static/images/payments/'
+    UPLOAD_PAYMENT_PROOF = 'static/css/images/payments/'
     login_manager.init_app(app)
     app.config['UPLOAD_PATH'] = UPLOAD_PATH
     app.config['UPLOAD_PRODUCTS'] = UPLOAD_PRODUCTS
-    app.config['UPLOAD_PRODUCTS'] = UPLOAD_PAYMENT_PROOF
+    app.config['UPLOAD_PAYMENT_PROOF'] = UPLOAD_PAYMENT_PROOF
 
     db.init_app(app)
     #socketio.init_app(app)
