@@ -58,58 +58,6 @@
 
 </style>
 <body>
-  <script>
-    function playsound(){
-      const audio = document.getElementById('notifsound');
-      if (audio){
-        audio.play();
-      }
-    }
-    {%if new_notification%}
-          playsound();
-        {%endif%}
-function toggleDropdown(){
-  document.getElementById("dropdownContent").classList.toggle("show");
-}
-window.onclik = function(event){
-  if (!event.target.matches('.btn btn-outline-primary rounded-pill')) {
-
-    let dropdowns = document.getElementByClassName("dropdown-content");
-    for( let i = 0; i < dropdowns.length; i++){
-      dropdowns[i].classList.remove("show");
-
-    }
-  }
-}
-
-  </script>
-<audio id="order-sound" src="{{url_for('static', filename='notify.m4a')}}" preload="auto"></audio>
-
-<script>
-    function checkPharmacyAlerts() {
-        fetch("/pharmacy_order_alerts")
-            .then(response => response.json())
-            .then(data => {
-                let lastPending = localStorage.getItem("lastPendingOrder");
-                let lastReady = localStorage.getItem("lastReadyOrder");
-
-                if (data.pending_id && lastPending !== String(data.pending_id)) {
-                    document.getElementById("pending-sound").play();
-                    localStorage.setItem("lastPendingOrder", data.pending_id);
-                }
-
-                if (data.ready_id && lastReady !== String(data.ready_id)) {
-                    document.getElementById("ready-sound").play();
-                    localStorage.setItem("lastReadyOrder", data.ready_id);
-                }
-            })
-            .catch(err => console.error("Error checking alerts:", err));
-    }
-
-    setInterval(checkPharmacyAlerts, 10000); // Every 10 seconds
-</script>
-
-  <audio id="notifsound" src="{{url_for('static', filename='notify.m4a')}}" preload="auto"></audio>
 
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="containerr">

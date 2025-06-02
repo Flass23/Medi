@@ -68,16 +68,6 @@ def save_update_profile_picture(form_picture):
     return post_img_Fn
 
 
-@main.route('/check_order_updates', methods=['GET'])
-@login_required
-def check_order_updates():
-    latest_order = Order.query.filter_by(user_id=current_user.id).order_by(Order.create_at.desc()).first()
-
-    if latest_order and latest_order.status == "Approved":
-        return jsonify({'status': 'approved', 'order_id': latest_order.id})
-
-    return jsonify({'status': 'none'})
-
 
 @main.route('/order_history')
 @login_required
@@ -207,12 +197,16 @@ def contact():
 @main.route('/viewproduct/<int:product_id>', methods=['POST', 'GET'])
 def viewproduct(product_id):
     formpharm = Set_PharmacyForm()
+    formpharm.pharmacy.choices=[(-1, "Select a Pharmacy")] + [(p.id, p.name) for p in Pharmacy.query.all()]
+
     form = CartlistForm()
     product = Product.query.filter_by(id=product_id).first()
+    pharmacy = Pharmacy.query.get_or_404(session.get('pharmacy_id'))
     item_picture = "dsdsqd"
     if product.pictures is not None:
         item_picture = url_for('static', filename=('css/images/products/' + product.pictures))
-    return render_template('customer/updated_productview.html', product=product, formpharm=formpharm, form=form, item_picture=item_picture)
+    return render_template('customer/updated_productview.html', product=product, pharmacy=pharmacy,
+                           formpharm=formpharm, form=form, item_picture=item_picture)
 
 @main.route('/search/<int:page_num>', methods=['POST', 'GET'])
 @login_required

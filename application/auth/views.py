@@ -127,6 +127,10 @@ def registerpharmacy():
     if request.method == "POST":
         if form.validate_on_submit():
             token = ""
+            testi = Pharmacy.query.filter_by(email=form.email.data).first()
+            if testi:
+                flash('Email already exists')
+                return redirect(url_for('auth.registerpharmacy'))
             new_pharmacy = addpharma(form)
             if new_pharmacy:
              #   new_pharmacy.latitude = form.lat.data
@@ -161,6 +165,10 @@ def register():
     if request.method == "POST":
         if form.validate_on_submit():
             token = ""
+            userq = User.query.filter_by(email=form.Email.data).first()
+            if userq:
+                flash('Email already exists')
+                return redirect(url_for('auth.register'))
             users = adduser(form)
             if users:
                 db.session.add(users)
