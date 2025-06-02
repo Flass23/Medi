@@ -398,6 +398,7 @@ def products():
     form3 = addmore()
     form = update()
     product = Product.query.filter(Product.pharmacy_id==mypharmacy.id).all()
+
     pharmacy_id = session.get('pharmacy_id')
     pharmacy = Pharmacy.query.get_or_404(pharmacy_id)
     return render_template('pharmacy/updated_products.html', product=product, form4=form4, form=form, 
