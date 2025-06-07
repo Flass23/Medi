@@ -113,8 +113,8 @@ class confirmpurchase(FlaskForm):
     transid = StringField('Enter your Mpesa/Ecocash Transaction ID')
     payment_number = StringField('Phone Number Used for payment')
     latitude = HiddenField('Latitude')
-    logitude = HiddenField('Logitude')
-    payment_screenshot = FileField('Upload Product Picture', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'gif'])])
+    logitude = HiddenField('Longitude')
+    payment_screenshot = FileField('Upload Proof of Payment', validators=[FileAllowed(['jpg', 'jpeg', 'png'])])
 
     drop_address = StringField('Delivery Address (be specific as possible - room number, village, landmarks, nearby places))')
     submit = SubmitField("Buy Cart")
@@ -159,4 +159,14 @@ class updatedeliveryform(FlaskForm):
 
 
 
+class addstaffform(FlaskForm):
+    names = StringField('Names:', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired()])
+    role = SelectField('Assign Role', validators=[DataRequired()], choices=[('Manager', 'Manager'), ('Cashier', 'Cashier')])
+    password = StringField('Password', validators=[DataRequired()])
+    submit = SubmitField('Add Staff')
 
+class UpdatePharmacyForm(FlaskForm):
+    mpesacode = StringField("Mpesa Till No.", validators=[DataRequired()])
+    ecocashcode = StringField("Ecocash Till No.", validators=[DataRequired()])
+    submit = SubmitField('Save')
