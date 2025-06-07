@@ -1,6 +1,5 @@
 import os
-import secrets
-from flask import render_template, redirect, request, url_for, flash, session, jsonify
+from flask import render_template, redirect,  url_for, flash, session
 from flask_login import login_required, current_user, logout_user # type: ignore
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc, or_
@@ -8,6 +7,7 @@ from . import main
 from ..forms import *
 from ..models import *
 from PIL import Image
+
 
 PRODUCTS_PER_PAGE = 9
 
@@ -26,7 +26,6 @@ def calculate_loyalty_points(user, sale_amount):
 
     db.session.commit()
     return points_earned
-
 def save_product_picture(file):
     # Set the desired size for resizing
     size = (300, 300)
@@ -41,7 +40,7 @@ def save_product_picture(file):
     post_img_fn = random_hex + f_ex
 
     # Define the path to save the file (UPLOAD_PRODUCTS should be configured in your Flask app)
-    post_image_path = os.path.join(current_app.root_path, current_app.config['UPLOAD_PAYMENT_PROOF'], post_img_fn)
+    post_image_path = os.path.join(current_app.root_path, current_app.config['UPLOAD_PRODUCTS'], post_img_fn)
 
     try:
         # Open the image
@@ -73,7 +72,8 @@ def save_update_profile_picture(form_picture):
 @login_required
 def order_history():
     formpharm= Set_PharmacyForm()
-    orders = Order.query.all()
+    formpharm.pharmacy.choices=[(-1, "Select a Pharmacy")] + [(p.id, p.name) for p in Pharmacy.query.all()]
+    orders = Order.query.filter_by(user_id=current_user.id, pharmacy_id=session.get('pharmacy_id')).all()
     return render_template('customer/orderhistory.html', formpharm=formpharm, orders=orders)
 
 @main.route('/myorder', methods=['GET', 'POST'])
@@ -86,7 +86,7 @@ def myorders():
     formpharm.pharmacy.choices=[(-1, "Select a Pharmacy")] + [(p.id, p.name) for p in Pharmacy.query.all()]
     
     user = User.query.get_or_404(user_id)
-    discount=0.00
+    0.00
     total = 0.00
     orders = Order.query.filter(Order.user_id==current_user.id, or_(Order.status=="Pending", Order.status=="Approved")).order_by(desc(Order.create_at)).all()
 
@@ -110,7 +110,7 @@ def completed_order():
     pharmacy = Pharmacy.query.get_or_404(session.get('pharmacy_id'))
     formpharm.pharmacy.choices=[(-1, "Select a Pharmacy")] + [(p.id, p.name) for p in Pharmacy.query.all()]
     user = User.query.get_or_404(user_id)
-    orders_completed = Order.query.filter(user_id==current_user.id, Order.status=="Ready").order_by(desc(Order.create_at)).all()
+    orders_completed = Order.query.filter(Order.user_id==current_user.id, Order.status=="Delivered").order_by(desc(Order.create_at)).all()
     return render_template('customer/updated_complete.html', user=user, formpharm=formpharm, pharmacy=pharmacy, orders_completed = orders_completed)
 
 
@@ -267,12 +267,19 @@ def addorder(total_amount):
         return redirect(url_for('main.myorders', order_id=existing_order.id))
     else:
         print("Creating a new order")
-
-        neworder = Order(user_id=current_user.id, payment=form.payment.data,
-                            user_email=current_user.email, location=form.drop_address.data, pharmacy_id=pharm.id, 
-                            source_pharmacy=pharm.name, logitude=form.logitude.data, latitude=form.latitude.data)
-        pics = save_product_picture(form.payment_screenshot.data)
-        neworder.screenshot = pics
+        if form.validate_on_submit():
+            neworder = Order(user_id=current_user.id, payment=form.payment.data,
+                                user_email=current_user.email, location=form.drop_address.data, pharmacy_id=pharm.id,
+                                source_pharmacy=pharm.name, longitude=float(form.logitude.data or 0.0), latitude=float(form.latitude.data or 0.0))
+            file = form.payment_screenshot.data
+            if not form.payment_screenshot.data:
+                flash("your are missing payment proof")
+                return redirect(url_for('main.cart'))
+            pics = save_product_picture(file)
+            neworder.screenshot = pics
+        else:
+            flash('form did not validate')
+            return redirect(url_for('main.cart'))
         
         #hashed_order = flask_bcrypt.generate_password_hash(neworder.id)
         if form.transid.data:
@@ -409,6 +416,7 @@ def remove_from_cart(item_id):
     db.session.commit()        #db.session.delete()
 
     return redirect(url_for('main.cart', user_id=current_user.id))
+
 
 
 

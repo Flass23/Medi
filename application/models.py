@@ -3,7 +3,8 @@ import pytz
 from flask_login import UserMixin  # type: ignore
 from itsdangerous import TimedSerializer
 from flask import current_app
-
+from sqlalchemy.orm import backref, Session
+from sqlalchemy import event
 from . import login_manager, db
 from zoneinfo import ZoneInfo
 import secrets
@@ -78,7 +79,7 @@ class Product(db.Model):
     description = db.Column(db.String(100), nullable=False)
     cart_items = db.relationship('CartItem', backref='product', lazy=True)
     order_items = db.relationship('OrderItem', backref='product', lazy=True)
-    warning = db.Column(db.String(50), default='quantity good')
+    warning = db.Column(db.String(50), default='Quantity Good')
     category = db.Column(db.String(50), nullable=True, default='Uncategorized')
     pharmacy_id = db.Column(db.Integer, db.ForeignKey('pharmacy.id'))
 
@@ -222,3 +223,20 @@ class Delivery(db.Model):
         "longitude": self.longitude,
         "order_id": self.order_id
     }
+
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_type = db.Column(db.String(20))  # 'pharmacy', 'customer', 'delivery'
+    user_id = db.Column(db.Integer)       # e.g., Pharmacy.id
+    message = db.Column(db.String(255))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    is_read = db.Column(db.Boolean, default=False)
+
+class Staff(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    names = db.Column(db.String(200), nullable=False)
+    email = db.Column(db.String(30), unique=True, nullable=False)
+    pharmacy_id = db.Column(db.Integer, db.ForeignKey('pharmacy.id'))
+    role = db.Column(db.String(120))
+    password = db.Column(db.String(100), nullable=False)
+    pharmacy = db.relationship('Pharmacy', backref='Staff_members')

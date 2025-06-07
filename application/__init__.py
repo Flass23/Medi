@@ -11,7 +11,9 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
 login_manager.login_view = "auth.newlogin"
+from flask_socketio import SocketIO
 
+socketio = SocketIO(cors_allowed_origins="*")
 
 
 def create_app(config_name):
@@ -27,7 +29,8 @@ def create_app(config_name):
     app.config['UPLOAD_PAYMENT_PROOF'] = UPLOAD_PAYMENT_PROOF
 
     db.init_app(app)
-    #socketio.init_app(app)
+    socketio.init_app(app)
+
     mail = Mail(app)
     mail.init_app(app)
 

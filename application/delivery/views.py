@@ -1,14 +1,17 @@
 import os
-import secrets
-from flask import render_template, redirect, request, url_for, flash, session, jsonify
-from flask_login import login_required, current_user, logout_user # type: ignore
-from sqlalchemy.exc import IntegrityError
-from application.models import Delivery, DeliveryGuy
-from sqlalchemy import desc
+
 from PIL import Image
+from flask import render_template, redirect, url_for, flash, session
+from flask_login import login_required, current_user, logout_user  # type: ignore
+from sqlalchemy import desc
+from sqlalchemy.exc import IntegrityError
+
+from application.utils.notification import create_notification
 from . import delivery
+from .. import socketio
 from ..forms import *
 from ..models import *
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -83,13 +86,14 @@ def takeorder(order_id):
         latitude=order.latitude,
         longitude=order.longitude,
         delivery_guy_id=current_user.id,
-        order_idd=order.order_id,
+        order_id=order.order_id,
         status="Out for Delivery")
     order.status = "Out for Delivery"
 
     try:
         db.session.add(new_delivery)
         db.session.commit()
+
         flash('Order taken successfully.')
     except IntegrityError:
         db.session.rollback()
@@ -97,6 +101,19 @@ def takeorder(order_id):
         return redirect(url_for('delivery.dashboard'))
 
     return redirect(url_for('delivery.dashboard'))
+
+# In your delivery_routes.py or similar
+from flask import jsonify
+
+@delivery.route('/api/delivery/<order_id>', methods=['GET'])
+@login_required
+def get_delivery_status(order_id):
+    delivery = Delivery.query.filter_by(order_id=order_id).first()
+    if delivery:
+        return jsonify(delivery.to_dict())
+    return jsonify({"error": "Delivery not found"}), 404
+
+
 
 @delivery.route('/mydeliveries', methods=["POST", "GET"])
 @login_required
@@ -111,34 +128,73 @@ def mydeliveries():
     formpharm=Set_PharmacyForm()
     formpharm.pharmacy.choices=[(-1, "Select a Pharmacy")] + [(p.id, p.name) for p in Pharmacy.query.all()]
   
-    return render_template('delivery/ActiveOrder.html', myform=myform, pharmacy=pharmacy, deliveries=deliveries, delivery_update=delivery_update,formpharm=formpharm)
+    return render_template('delivery/ActiveOrder.html', myform=myform, pharmacy=pharmacy,
+                           deliveries=deliveries, delivery_update=delivery_update,formpharm=formpharm)
 
 
-@delivery.route('/update_delivery/<int:delivery_id>',methods=["POST", "GET"])
+
+
+
+@delivery.route('/update_delivery/<int:delivery_id>', methods=["GET", "POST"])
 @login_required
 def update_delivery(delivery_id):
-    myform = updatedeliveryform()
+    form = updatedeliveryform()
     delivery = Delivery.query.get_or_404(delivery_id)
-    if not delivery:
-        flash('the delivery does not exist')
-        return redirect(url_for('delivery.mydeliveries'))
-    else:
-        if myform.validate_on_submit():
-            delivery.status = myform.status.data
-            _image = save_delivery_picture(myform.delivery_prove.data)
-           
-            delivery.customer_pic =_image
-            db.session.add(delivery)
-            try:
-                db.session.commit()
-                flash('Delivery Status successfully updated.')
-                return redirect(url_for('delivery.mydeliveries'))
-            except IntegrityError:
-                flash('Error occured. We working on solving it')
-                return redirect(url_for('delivery.mydeliveries'))
-        else:
-            flash("form failed to validate after submission.")
+
+    if form.validate_on_submit():
+        new_status = form.status.data
+        old_status = delivery.status
+
+        if old_status == new_status:
+            flash('Status is already up to date.')
             return redirect(url_for('delivery.mydeliveries'))
+
+        delivery.status = new_status
+
+        if form.delivery_prove.data:
+            image_filename = save_delivery_picture(form.delivery_prove.data)
+            delivery.customer_pic = image_filename
+
+        try:
+            db.session.add(delivery)
+            db.session.commit()
+
+            # 🔔 Message
+            message = f"Delivery #{delivery.id} status changed from {old_status} to {new_status}"
+
+            # 🔔 Notify customer & emit event
+            if delivery.orders.user_id:
+                create_notification(user_type='customer', user_id=delivery.order.user_id, message=message)
+                socketio.emit('delivery_status_update', {
+                    'user_type': 'customer',
+                    'user_id': delivery.customer_id,
+                    'delivery_id': delivery.id,
+                    'status': new_status,
+                    'message': message
+                }, namespace='/notifications', broadcast=True)
+
+            # 🔔 Notify pharmacy & emit event
+
+            create_notification(user_type='pharmacy', user_id=delivery.pharmacy_id, message=message)
+            socketio.emit('delivery_status_update', {
+                    'user_type': 'pharmacy',
+                    'user_id': delivery.pharmacy_id,
+                    'delivery_id': delivery.id,
+                    'status': new_status,
+                    'message': message
+                }, namespace='/notifications', broadcast=True)
+
+            flash('Delivery status successfully updated.')
+
+        except IntegrityError:
+            db.session.rollback()
+            flash('An error occurred while updating the delivery. Please try again.')
+
+        return redirect(url_for('delivery.mydeliveries'))
+
+    flash("Form failed to validate.")
+    return redirect(url_for('delivery.mydeliveries'))
+
 
 @delivery.route('/deliverylayout', methods=["POST", "GET"])
 def deliverylayout():
@@ -168,32 +224,29 @@ def set_pharmacy():
 @delivery.route('/deliverystats')
 @login_required
 def deliverystats():
-    pass
+    delivery_guy_id = current_user.id
 
-"""
-@delivery.route('/api/orders')
-def get_orders():
-    delivery_position = globals().get("delivery_position", {})
-    active_order_id = globals().get("active_order_id", None)
+    deliveries = Delivery.query.filter_by(delivery_guy_id=delivery_guy_id).all()
+    total = len(deliveries)
 
-    orders = Delivery.query.filter_by(delivery_guy_id=current_user.id).all()
+    delivered = [d for d in deliveries if d.status == 'Delivered']
+    cancelled = [d for d in deliveries if d.status == 'Cancelled']
+    in_progress = [d for d in deliveries if d.status not in ['Delivered', 'Cancelled']]
 
-    return jsonify({
-        "orders": [o.to_dict() for o in orders],
-        "delivery": delivery_position,
-        "target": active_order_id
-    })
+    success_rate = (len(delivered) / total * 100) if total else 0
 
-@delivery.route('/api/update_delivery', methods=['POST'])
-def update_delivery():
-    global delivery_position
-    data = request.get_json()
-    delivery_position = data
-    return jsonify({"status": "updated"})
+    # Average delivery time (assumes Delivery model has `start_time` and `end_time` as datetime fields)
+    total_time = sum([(d.end_time - d.start_time).total_seconds() for d in delivered if d.start_time and d.end_time], 0)
+    avg_delivery_time = total_time / len(delivered) / 60 if delivered else 0  # in minutes
 
-@delivery.route('/api/set_target/<int:order_id>', methods=['POST'])
-def set_target(order_id):
-    global active_order_id
-    active_order_id = order_id
-    return jsonify({"status": "target set", "target": order_id})
-"""
+    recent_deliveries = sorted(deliveries, key=lambda d: d.end_time or d.id, reverse=True)[:5]
+
+    return render_template('delivery/my_stats.html',
+                           total=total,
+                           delivered=len(delivered),
+                           in_progress=len(in_progress),
+                           cancelled=len(cancelled),
+                           success_rate=round(success_rate, 2),
+                           avg_delivery_time=round(avg_delivery_time, 2),
+                           recent_deliveries=recent_deliveries)
+

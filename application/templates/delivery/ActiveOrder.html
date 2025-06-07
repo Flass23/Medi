@@ -21,15 +21,17 @@
                 <td>{{ delivery.address }}</td>
                 <td>
                 <form action="{{url_for('delivery.update_delivery', delivery_id=delivery.id)}}" method="POST">
+
+                    <div class="form-group">
                         {{ myform.hidden_tag() }}
-                        <div class="form-group">
                        {{myform.status(class='form-control')}}
                        {{myform.delivery_prove.label}}
                        {{myform.delivery_prove(class='form-control')}}
                        {{myform.submit(class='btn btn-outline-primary rounded-pill')}}
                         </div>
                 </form>
-                </td>
+
+</td>
             </tr>
             {% endfor %}
         </tbody>

@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/productlist.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/orders.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebars.css') }}">
+
 </head>
 
 <style>
@@ -65,13 +66,14 @@
     }
   </script>
 
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="containerr">
-      <a class="navbar-brand d-flex align-items-center" href="{{url_for('main.home')}}">
+
+            <!-- Main Content -->
+            <div id="content" class="bg-primary">
+                     <a class="align-items left" href="{{url_for('main.home')}}">
         <img src="{{ url_for('static', filename='css/images/file_000000002d7061f88f3fe448b88346b4.png') }}" alt="MediCart Logo" class="rounded-circle" width="10%" height="10%">
       </a>
-      <div>
-        {% if current_user.is_authenticated %}
+                <!-- Topbar -->
+ {% if current_user.is_authenticated %}
           <a href="{{ url_for('main.home') }}" class="btn btn-outline-primary rounded-pill">Home</a>
           <a href="{{ url_for('main.menu', page_num=1) }}" class="btn btn-outline-primary rounded-pill">Menu</a>
           {% if total_count %}
@@ -83,6 +85,33 @@
           <a href="{{ url_for('main.logout') }}" class="btn btn-outline-primary rounded-pill">Logout</a>
 
           {% if formpharm is defined %}
+            <div class="dropdown">
+              <form action="{{url_for('main.set_pharmacy')}}" method="POST">
+                {{formpharm.hidden_tag()}}
+
+                <div class="input-group">
+                  {{formpharm.pharmacy(class='form-control bg-light border-0 small')}}
+                  <div class="input-group-append">
+                    <button class="btn btn-primary" type="submit">
+                      <i class="fa fa-check"></i>
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          {% endif %}
+        {% else %}
+          <a href="{{url_for('auth.newlogin')}}" class="btn btn-outline-primary rounded-pill">Login</a>
+          <a href="{{url_for('auth.register', Options=1)}}" class="btn btn-outline-primary rounded-pill">Register Personal Account</a>
+          <a href="{{url_for('auth.registerpharmacy')}}" class="btn btn-outline-primary rounded-pill">Register Pharmacy</a>
+        {% endif %}
+
+      </div>
+
+              <li class="nav-item dropdown no-arrow d-sm-none">
+                            <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
+                                aria-labelledby="searchDropdown">
+ {% if formpharm is defined %}
             <div class="dropdown">
               <form action="{{url_for('main.set_pharmacy')}}" method="POST">
                 {{formpharm.hidden_tag()}}
@@ -98,14 +127,19 @@
               </form>
             </div>
           {% endif %}
-        {% else %}
-          <a href="{{url_for('auth.newlogin')}}" class="btn btn-outline-primary rounded-pill">Login</a>
-          <a href="{{url_for('auth.register', Options=1)}}" class="btn btn-outline-primary rounded-pill">Register Personal Account</a>
-          <a href="{{url_for('auth.registerpharmacy')}}" class="btn btn-outline-primary rounded-pill">Register Pharmacy</a>
-        {% endif %}
-      </div>
-    </div>
-  </nav>
+                            </div>
+              </li>
+                        <!-- Nav Item - Search Dropdown (Visible Only XS) -->
+
+                        <!-- Nav Item - Alerts -->
+
+
+                        <div class="topbar-divider d-none d-sm-block"></div>
+
+                    </ul>
+
+                </nav>
+        </div>
 
   <div class="container mt-4">
     {% with messages = get_flashed_messages() %}
@@ -125,6 +159,50 @@
       </div>
     </div>
   </footer>
+<script>
+    const socket = io();
+    const CURRENT_USER_ID = {{ current_user.id }};
+
+    const playSound = (soundPath) => new Audio(soundPath).play();
+
+    socket.on('order_status_updated', (data) => {
+        if (data.user_id === CURRENT_USER_ID) {
+            playSound('/static/sounds/status_update.mp3');
+        }
+    });
+
+    socket.on('order_accepted', (data) => {
+        if (data.user_id === CURRENT_USER_ID) {
+            playSound('/static/sounds/order_accepted.mp3');
+        }
+    });
+</script>
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+<script>
+  const socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + '/notifications');
+
+  socket.on('connect', () => {
+    console.log("Socket connected to /notifications");
+  });
+
+  socket.on('delivery_status_update', function(data) {
+    // Filter messages for this specific user (by user_type and user_id)
+    const currentUserType = '{{ current_user.role }}'; // assuming you store this
+    const currentUserId = '{{ current_user.id }}';
+
+    if (data.user_type === currentUserType && data.user_id == currentUserId) {
+      alert(data.message);  // Or show custom toast/notification
+      // You could also update the UI dynamically here
+    }
+  });
+</script>
+<script src="{{url_for('static', filename='/vendor/jquery/jquery.min.js')}}"></script>
+<script src="{{url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
+<!-- Core plugin JavaScript-->
+<script src="{{url_for('static', filename='vendor/jquery-easing/jquery.easing.min.js')}}"></script>
+
+<!-- Custom scripts for all pages-->
+<script src="{{url_for('static', filename='js/sb-admin-2.min.js')}}"></script>
 
   <script src="{{url_for('static', filename='sidebars.js')}}"></script>
 </body>

@@ -1,45 +1,38 @@
 {% extends "layout.html" %}
 {% block title %}Register your Pharmacy - MediCart{% endblock %}
-{% block content %}
 
-<div class="text-center">
+{% block content %}
+<div class="text-center mb-4">
     <h4>Pharmacy Registration</h4>
     <p class="text-muted">Fill in the details below to register your pharmacy.</p>
 </div>
-<form action="{{ url_for('auth.registerpharmacy') }}" method="post" enctype="multipart/form-data">
+
+<form action="{{ url_for('auth.registerpharmacy') }}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
     {{ form.hidden_tag() }}
-    <div class="form-group">
-        {{ form.pharmacy_name.label(class="form-label") }}
-        {{ form.pharmacy_name(class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.licence_number.label(class="form-label") }}
-        {{ form.licence_number(class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.email.label(class="form-label") }}
-        {{ form.email(class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.phone.label(class="form-label") }}
-        {{ form.phone(class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.address.label(class="form-label") }}
-        {{ form.address(class="form-control") }}
-    </div>
 
-    <div class="form-group">
-        {{ form.opening_hours_and_days.label(class="form-label") }}
-        {{ form.opening_hours_and_days(class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.password.label(class="form-label") }}
-        {{ form.password(class="form-control") }}
-    </div>
+    {% for field in [form.pharmacy_name, form.licence_number, form.email, form.phone, form.address, form.opening_hours_and_days, form.password] %}
+        <div class="form-group mb-3">
+            {{ field.label(class="form-label") }}
+            {{ field(class="form-control", placeholder=field.label.text) }}
+            {% if field.errors %}
+                <div class="text-danger small">
+                    {% for error in field.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    {% endfor %}
 
+    <div class="form-group mb-3">
+        <label for="latitude">Latitude</label>
+        <input type="text" name="lat" id="latitude" class="form-control" required>
+    </div>
+    <div class="form-group mb-3">
+        <label for="longitude">Longitude</label>
+        <input type="text" name="lon" id="longitude" class="form-control" required>
+    </div>
 
     <button type="submit" class="btn btn-primary w-100">Register Pharmacy</button>
 </form>
-
-{%endblock content%}
+{% endblock %}

@@ -1,17 +1,18 @@
-from flask import render_template, redirect, url_for, session, request, flash, current_app
-from werkzeug.exceptions import InternalServerError
-from werkzeug.security import generate_password_hash, check_password_hash
-from ..models import User, Pharmacy, DeliveryGuy
-from flask_bcrypt import Bcrypt # type: ignore
-from flask_login import login_user, current_user, login_required # type: ignore
-from . import auth
-
-from ..forms import LoginForm, RegistrationForm, PharmacyRegistrationForm, Set_PharmacyForm
-from .. import (login_manager, db)
-from sqlalchemy.exc import IntegrityError
-from flask_mail import Message, Mail # type: ignore
 from smtplib import SMTPAuthenticationError
-from itsdangerous import URLSafeTimedSerializer, SignatureExpired
+
+from flask import (session,
+                   request)
+from flask_bcrypt import Bcrypt  # type: ignore
+from flask_login import login_user, current_user, login_required  # type: ignore
+from flask_mail import Message, Mail  # type: ignore
+from itsdangerous import URLSafeTimedSerializer
+from sqlalchemy.exc import IntegrityError
+from werkzeug.exceptions import InternalServerError
+
+from . import auth
+from .. import (login_manager, db)
+from ..forms import RegistrationForm, PharmacyRegistrationForm
+from ..models import User, Pharmacy, DeliveryGuy, Staff
 
 s = URLSafeTimedSerializer('ad40898f84d46bd1d109970e23c0360e')
 
@@ -118,7 +119,9 @@ def load_user(user_id):
         return User.query.get(int(user_id))
     elif user_type == 'delivery_guy':
         return DeliveryGuy.query.get(int(user_id))
-    return None                                                                                                                                 
+    elif user_type == 'pharmacy_staff':
+        return Staff.query.get(int(user_id))
+    return None
 
 
 @auth.route("/registerpharmacy", methods=['POST', 'GET'])
@@ -133,8 +136,8 @@ def registerpharmacy():
                 return redirect(url_for('auth.registerpharmacy'))
             new_pharmacy = addpharma(form)
             if new_pharmacy:
-             #   new_pharmacy.latitude = form.lat.data
-              #  new_pharmacy.longitude = form.lon.data
+                new_pharmacy.latitude = form.lat.data
+                new_pharmacy.longitude = form.lon.data
                 db.session.add(new_pharmacy)
                 try:
                     db.session.commit()
@@ -204,6 +207,7 @@ def newlogin():
             user = User.query.filter_by(email=form.email.data).first()
             pharmacy = Pharmacy.query.filter_by(email=form.email.data).first()
             delivery_guy = DeliveryGuy.query.filter_by(email=form.email.data).first()
+            staff = Staff.query.filter_by(email=form.email.data).first()
 
             if user and bcrypt.check_password_hash(user.password, form.password.data):
                 if user.isadmin:
@@ -234,14 +238,19 @@ def newlogin():
                 session['email'] = delivery_guy.email
                 flash(f'Login Successful, welcome {delivery_guy.names}')
                 return redirect(url_for('delivery.dashboard'))  # <-- create this route for delivery guy dashboard
-
+            elif staff and bcrypt.check_password_hash(staff.password, form.password.data):
+                login_user(staff)
+                session['user_type'] = staff.role
+                session['pharmacy_id'] = staff.pharmacy_id
+                session['email'] = staff.email
+                flash(f'Login Successful, welcome {staff.names}')
+                return redirect(url_for('pharmacy.adminpage'))
             else:
                 flash("Invalid login credentials", 'danger')
-
     return render_template('auth/newlogin.html', form=form, formpharm=formpharma)
 
 
-from itsdangerous import SignatureExpired, BadSignature
+from itsdangerous import BadSignature
 
 def confirm_token(token, expiration=86400):
     try:

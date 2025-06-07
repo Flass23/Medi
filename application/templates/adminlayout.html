@@ -22,19 +22,6 @@
 </head>
 
 <body id="page-top">
-    <script>
-        function playsound(){
-            const audio = document.getElementById('notifsound');
-            if (audio){
-              audio.play();
-            }
-          }
-          {%if new_notification%}
-                playsound();
-        {%endif%}
-    </script>
-    <audio id="notifsound" src="{{url_for('static', filename='notify.m4a')}}" preload="auto"></audio>
-
 
     <!-- Page Wrapper -->
     <div id="wrapper">
@@ -117,16 +104,16 @@
 
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
-                <a class="nav-link collapsed" href="{{url_for('pharmacy.addproducts')}}" >
+                <a class="nav-link collapsed" href="{{url_for('pharmacy.addstaff')}}" >
                     <i class="fas fa-user-plus"></i>
                     <span>Add Stuff</span>
                 </a>
 
             </li>
             <li class="nav-item">
-                <a class="nav-link collapsed" href="{{url_for('pharmacy.addproducts')}}" >
+                <a class="nav-link collapsed" href="{{url_for('pharmacy.updatepharmacy')}}" >
                     <i class="fas fa-edit"></i>
-                    <span>Update Pharmacy Details</span>
+                    <span>Update Payment Options</span>
                 </a>
 
             </li>
@@ -139,16 +126,12 @@
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Logout</span>
                 </a>
-
             </li>
-
-            <!-- Sidebar Message -->
         </ul>
         <!-- End of Sidebar -->
 
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
-
             <!-- Main Content -->
             <div id="content">
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
@@ -156,25 +139,7 @@
                     </button>
                 <!-- Topbar -->
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-
-
-                    <!-- Topbar Search -->
-                    <form action="{{ url_for('main.search', page_num=1) }}"
-                        class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
-                        <div class="input-group">
-                            <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..."
-                                aria-label="Search" aria-describedby="basic-addon2">
-                            <div class="input-group-append">
-                                <button class="btn btn-primary" type="button" >
-                                    <i class="fas fa-search fa-sm"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-
-                    <!-- Topbar Navbar -->
-                    <ul class="navbar-nav ml-auto">
-
+                   <ul class="navbar-nav ml-auto">
                         <!-- Nav Item - Search Dropdown (Visible Only XS) -->
                         <li class="nav-item dropdown no-arrow d-sm-none">
                             <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
@@ -198,20 +163,71 @@
                                 </form>
                             </div>
                         </li>
+
+                        <!-- Nav Item - Alerts -->
+                        <li class="nav-item dropdown no-arrow mx-1">
+                            <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-bell fa-fw"></i>
+                                <!-- Counter - Alerts -->
+                                <span class="badge badge-danger badge-counter">{{count}}</span>
+                            </a>
+                            <!-- Dropdown - Alerts -->
+                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="alertsDropdown">
+                                <h6 class="dropdown-header">
+                                    Notification Center
+                                </h6>
+                                  {% for note in unread_notifications %}
+                                 {%if note%}
+                                <a class="dropdown-item d-flex align-items-center" href="{{url_for('pharmacy.mark_notification_read', notification_id=note.id)}}">
+                                    <div class="mr-3">
+                                        <div class="icon-circle bg-primary">
+                                            <i class="fas fa-file-alt text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+
+                                        <div class="small text-gray-500">{{ note.timestamp.strftime('%Y-%m-%d %H:%M') }}</div>
+                                        <span class="font-weight-bold"> {{ note.message }}</span>
+
+                                    </div>
+                                </a>
+                                {%else%}
+                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                    <div class="mr-3">
+                                        <div class="icon-circle bg-primary">
+                                            <i class="fas fa-file-alt text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                    </div>
+                                    <span class="font-weight-bold">No new notifications</span>
+                                </a>
+                                {%endif%}
+                                {%endfor%}
+
+                                <a class="dropdown-item text-center small text-gray-500" href="#">Show All Notifications</a>
+                            </div>
+                        </li>
+
+
+
                         <div class="topbar-divider d-none d-sm-block"></div>
 
                         <!-- Nav Item - User Information -->
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{current_user.username}}</span>
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{current_user.name}}</span>
                                 <img class="img-profile rounded-circle"
-                                    src="img/undraw_profile.svg">
+                                    src="{{url_for('static', filename='css/images/undraw_profile.svg')}}">
                             </a>
 
                         </li>
 
                     </ul>
+
                 </nav>
 
                     <div class="row">
@@ -271,5 +287,50 @@
 
 <!-- Page level plugins -->
 <script src="vendor/chart.js/Chart.min.js"></script>
+<script>
+    const socket = io();
+    const CURRENT_PHARMACY_ID = {{ current_user.pharmacy_id }};
+
+    const playSound = (soundPath) => new Audio(soundPath).play();
+
+    socket.on('new_order', (data) => {
+        if (data.pharmacy_id === CURRENT_PHARMACY_ID) {
+            playSound('/static/notify.m4a');
+        }
+    });
+
+    socket.on('order_accepted', (data) => {
+        if (data.pharmacy_id === CURRENT_PHARMACY_ID) {
+             playSound('/static/notify.m4a');
+        }
+    });
+
+    socket.on('order_ready', (data) => {
+        if (data.pharmacy_id === CURRENT_PHARMACY_ID) {
+             playSound('/static/notify.m4a');
+        }
+    });
+</script>
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+<script>
+  const socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + '/notifications');
+
+  socket.on('connect', () => {
+    console.log("Socket connected to /notifications");
+  });
+
+  socket.on('delivery_status_update', function(data) {
+    // Filter messages for this specific user (by user_type and user_id)
+    const currentUserType = '{{ current_user.role }}'; // assuming you store this
+    const currentUserId = '{{ current_user.id }}';
+
+    if (data.user_type === currentUserType && data.user_id == currentUserId) {
+      alert(data.message);  // Or show custom toast/notification
+      // You could also update the UI dynamically here
+    }
+  });
+</script>
+
+
 
 </html>

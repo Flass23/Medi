@@ -63,9 +63,45 @@
     <div class="containerr">
           <a class="navbar-brand d-flex align-items-center" href="{{url_for('main.home')}}">
             <img src="{{ url_for('static', filename='css/images/file_000000002d7061f88f3fe448b88346b4.png') }}" alt="MediCart Logo" class="rounded-circle" width=10% height=10%>
-
         </a>
       <div>
+
+                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="alertsDropdown">
+                                <h6 class="dropdown-header">
+                                    Notification Center
+                                </h6>
+                                  {% for note in notifications %}
+                                 {%if note%}
+                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                    <div class="mr-3">
+                                        <div class="icon-circle bg-primary">
+                                            <i class="fas fa-file-alt text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+
+                                        <div class="small text-gray-500">{{ note.timestamp.strftime('%Y-%m-%d %H:%M') }}</div>
+                                        <span class="font-weight-bold"> {{ note.message }}</span>
+                                    </div>
+                                </a>
+                                {%else%}
+                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                    <div class="mr-3">
+                                        <div class="icon-circle bg-primary">
+                                            <i class="fas fa-file-alt text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                      <span class="font-weight-bold">No new notifications</span>
+                                    </div>
+                                </a>
+                                {%endif%}
+                                {%endfor%}
+
+                                <a class="dropdown-item text-center small text-gray-500" href="#">Show All Notifications</a>
+                            </div>
+                        </li>
           {%if current_user.is_authenticated%}
    
      
@@ -127,6 +163,35 @@
 
             </script>
             <script src="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
+<script>
+    const socket = io();
+
+    const playSound = (soundPath) => new Audio(soundPath).play();
+
+    socket.on('order_ready', (data) => {
+        playSound('/static/sounds/ready_order.mp3');
+    });
+</script>
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+<script>
+  const socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + '/notifications');
+
+  socket.on('connect', () => {
+    console.log("Socket connected to /notifications");
+  });
+
+  socket.on('delivery_status_update', function(data) {
+    // Filter messages for this specific user (by user_type and user_id)
+    const currentUserType = '{{ current_user.role }}'; // assuming you store this
+    const currentUserId = '{{ current_user.id }}';
+
+    if (data.user_type === currentUserType && data.user_id == currentUserId) {
+      alert(data.message);  // Or show custom toast/notification
+      // You could also update the UI dynamically here
+    }
+  });
+</script>
+
 
 
 </body>

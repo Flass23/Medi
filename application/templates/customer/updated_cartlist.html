@@ -32,15 +32,15 @@
                 </form>
             </td>
             </tbody>
-    </div>
-            {%endfor%}    
+
+            {%endfor%}
         </table>
     </div>
     <div class="cart-summary">
         <p>Total Price: M<span id="total-price">{{total_amount}}</span> includes Delivery Fees</p>
     </div>
-    <form action="{{url_for('main.addorder',total_amount=total_amount)}}" method="POST">
-                {{form3.csrf_token}}
+    <form action="{{url_for('main.addorder',total_amount=total_amount)}}"  method="POST" enctype="multipart/form-data">
+                {{ form3.hidden_tag() }}
                 <div class="form-group">
                     {{form3.payment.label}}
                     {{form3.payment(class='form-control')}}
@@ -64,7 +64,7 @@
 
                     {{form3.latitude()}}
                     {{form3.logitude()}}
-                    <button onclick="getLocation()"> 
+                    <button onclick="getLocation()" class="btn btn-light btn-sm">
                         Use your Current Location as Destination Address(recommended)
                     </button>
     <div class="button-container">

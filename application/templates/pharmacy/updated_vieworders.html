@@ -30,9 +30,9 @@
                         <td>{{item.quantity}}</td>
 
                         <td> M{{item.product.price}}</td>
-
-
                     </tr>
+                   <img class="image-top" style="width:50%;" src="{{ url_for('static', filename='css/images/products/'+ user_order.screenshot) }}" alt="{{ user_order.user_email }}">
+
                    {%endfor%}
           </tbody>
         </table>
