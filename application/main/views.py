@@ -20,12 +20,24 @@ def load_user(user_id):
         return User.query.get(int(user_id))
     return None 
 
+def update_product_status(Product):
+    for item in Product:
+        if item.quantity < 10:
+            item.warning == "Low Stock"
+            db.session.commit()
+        elif item.quantity <= 0:
+            db.session.delete(item)
+            db.sesion.commit()
+
+
+
 def calculate_loyalty_points(user, sale_amount):
     points_earned = int(sale_amount // 10) #a point for each 10 spent
     user.loyalty_points = points_earned + int(user.loyalty_points or 0)
 
     db.session.commit()
     return points_earned
+
 def save_product_picture(file):
     # Set the desired size for resizing
     size = (300, 300)
@@ -153,10 +165,12 @@ def cart():
     form = CartlistForm()
     form2 = removefromcart()
     form3 = confirmpurchase()
+    pres = upload_prescription()
     formpharm = Set_PharmacyForm()
     formpharm.pharmacy.choices=[(-1, "Select a Pharmacy")] + [(p.id, p.name) for p in Pharmacy.query.all()]
     pharmacy_id = session.get('pharmacy_id')
     user_id = current_user.id
+    pharmacy = Pharmacy.query.filter(Pharmacy.id == pharmacy_id).first()
     user = User.query.get_or_404(user_id)
     cart = Cart.query.filter(user_id==user.id, Cart.pharmacy_id == pharmacy_id).first()
     total_amount = 0.00
@@ -177,7 +191,8 @@ def cart():
 
 
     return render_template('customer/updated_cartlist.html', form=form, form3=form3, form2=form2,
-                           cart=cart, user=user,formpharm=formpharm, total_amount=total_amount, total_count=total_count)
+                           cart=cart, user=user,formpharm=formpharm, pharmacy=pharmacy,
+                           total_amount=total_amount, total_count=total_count, pres=pres)
 
 
 @main.route('/about', methods=['POST', 'GET'])
@@ -250,7 +265,7 @@ def search(page_num):
 def addorder(total_amount):
     form = confirmpurchase()
     formpharm = Set_PharmacyForm()
-
+    pres =upload_prescription()
     pharmacy_id = session.get('pharmacy_id')
     pharm = Pharmacy.query.get_or_404(pharmacy_id)
     cart = Cart.query.filter_by(user_id=current_user.id).first()
@@ -258,9 +273,7 @@ def addorder(total_amount):
     print(tyt)
     user = User.query.filter_by(id = current_user.id).first()
     if not cart:
-
         return redirect(url_for('main.menu'))
-
     existing_order = Order.query.filter_by(user_id=current_user.id, status='Pending', pharmacy_id=pharmacy_id).first()
     if existing_order:
         flash("You still have a pending order, wait for admin to approve before placing another.", "unsuccessful")
@@ -272,6 +285,7 @@ def addorder(total_amount):
                                 user_email=current_user.email, location=form.drop_address.data, pharmacy_id=pharm.id,
                                 source_pharmacy=pharm.name, longitude=float(form.logitude.data or 0.0), latitude=float(form.latitude.data or 0.0))
             file = form.payment_screenshot.data
+            print(form.latitude.data+" "+form.logitude.data)
             if not form.payment_screenshot.data:
                 flash("your are missing payment proof")
                 return redirect(url_for('main.cart'))
@@ -301,7 +315,8 @@ def addorder(total_amount):
         db.session.commit()
 
         total_amount = 0
-        
+
+
         for item in cart.cart_items:
             order_item = OrderItem(order_id=neworder.id, product_id=item.product.id, product_name=item.product.productname,
                                    product_price=item.product.price, quantity=item.quantity)
@@ -321,6 +336,10 @@ def addorder(total_amount):
                     redirect(url_for('main.cart'))
                 else:
                     product.quantity -= i.quantity
+                    if product.quantity > 10:
+                        product.warning == "Quantity Good"
+                    else:
+                        product.warning == "Low on Stock"
                     db.session.add(product)
             db.session.add(sale)
             points_earned = calculate_loyalty_points(user, total_amount)
@@ -370,25 +389,25 @@ def add_to_cart(item_id):
     form = CartlistForm()
     userid = current_user.id
     page_num = 1
-    print('starting...')
+    #print('starting...')
     product = Product.query.get_or_404(item_id)
     pharmacy_id = session.get('pharmacy_id')
     cart = Cart.query.filter(Cart.user_id==current_user.id, Cart.pharmacy_id==pharmacy_id).first()
     if not cart:
-        print('cart dont exist, creating one')
+       # print('cart dont exist, creating one')
         cart = Cart(user_id=current_user.id, pharmacy_id=pharmacy_id)
-        print('creation done')
+       # print('creation done')
         
         db.session.add(cart)
 
-    print('checking cart item...')
+   # print('checking cart item...')
     cart_item = CartItem.query.filter_by(cart_id=cart.id, product_id=product.id).first()
     if cart_item:
-        print('product exists on cart and incremeted')
+        #print('product exists on cart and incremeted')
         cart_item.quantity+=1
 
     else:
-        print('adding product to cart')
+        #print('adding product to cart')
         cart_item = CartItem(cart_id=cart.id, product_id=product.id, quantity=1)
         db.session.add(cart_item)
     total_amount = sum(item.product.price * item.quantity for item in cart.cart_items)
@@ -397,7 +416,7 @@ def add_to_cart(item_id):
         flash('Products added to cart.')
     except IntegrityError:
         return redirect(url_for('main.menu',page_num=1))
-    print('donee')
+    #print('donee')
 
     return redirect(url_for('main.menu', user_id=current_user.id, form=form, page_num=page_num, total_amount=total_amount))
 

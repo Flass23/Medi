@@ -7,31 +7,30 @@
         <h2>Order Id: {{user_order.order_id}} </h2>
         <p> Total Cost: M{{ total }} </p>
        <p>On {{user_order.create_at.strftime('%Y - %m - %d @ %H:%M')}}</p>
-      <div class="table-responsive small">
+      <img style="width: 50%;height: 200px;object-fit: cover;" src="{{ url_for('static', filename='css/images/products/'+ user_order.screenshot) }}" alt="{{ user_order.user_email }}">
+
         <table class="orders-table">
           <thead>
             <tr>
-                        <th>Prod. ID</th>
-                        <th>productname</th>
-                        <th>Description</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
+                        <th scope="col">Prod. ID</th>
+                        <th scope="col">productname</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Price</th>
             </tr>
 
           </thead>
           <tbody>
+
 
                    {%for item in user_order.order_items%}
                     <tr>
 
                         <td>{{item.product.id}}</td>
                         <td>{{item.product.productname}}</td>
-                        <td>{{item.product.description}}</td>
                         <td>{{item.quantity}}</td>
 
                         <td> M{{item.product.price}}</td>
                     </tr>
-                   <img class="image-top" style="width:50%;" src="{{ url_for('static', filename='css/images/products/'+ user_order.screenshot) }}" alt="{{ user_order.user_email }}">
 
                    {%endfor%}
           </tbody>

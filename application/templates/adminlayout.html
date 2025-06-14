@@ -22,10 +22,8 @@
 </head>
 
 <body id="page-top">
-
     <!-- Page Wrapper -->
     <div id="wrapper">
-
         <!-- Sidebar -->
     <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
@@ -295,19 +293,19 @@
 
     socket.on('new_order', (data) => {
         if (data.pharmacy_id === CURRENT_PHARMACY_ID) {
-            playSound('/static/notify.m4a');
+            playSound('/static/css/noty.mp3');
         }
     });
 
     socket.on('order_accepted', (data) => {
         if (data.pharmacy_id === CURRENT_PHARMACY_ID) {
-             playSound('/static/notify.m4a');
+             playSound('/static/css/noty.mp3');
         }
     });
 
     socket.on('order_ready', (data) => {
         if (data.pharmacy_id === CURRENT_PHARMACY_ID) {
-             playSound('/static/notify.m4a');
+             playSound('/static/css/noty.mp3');
         }
     });
 </script>

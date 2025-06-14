@@ -85,21 +85,22 @@ s0.parentNode.insertBefore(s1,s0);
       </a>
                 <!-- Topbar -->
  {% if current_user.is_authenticated %}
-          <a href="{{ url_for('main.home') }}" class="btn btn-outline-primary rounded-pill">Home</a>
-          <a href="{{ url_for('main.menu', page_num=1) }}" class="btn btn-outline-primary rounded-pill">Menu</a>
+          <a href="{{ url_for('main.home') }}" class="btn btn-outline-primary rounded-pill">
+              <i class="fas fa-home" title="Home"></i>
+          </a>
+          <a href="{{ url_for('main.menu', page_num=1) }}" class="btn btn-outline-primary rounded-pill"><i class="fas fa-bars" title="Menu"></i></a>
           {% if total_count %}
-            <a href="{{ url_for('main.cart') }}" class="btn btn-outline-primary rounded-pill">Cart<sup>{{total_count}}</sup></a>
+            <a href="{{ url_for('main.cart') }}" class="btn btn-outline-primary rounded-pill"><i class="fas fa-shopping-cart" title="Cart"></i><sup>{{total_count}}</sup></a>
           {% else %}
-            <a href="{{ url_for('main.cart') }}" class="btn btn-outline-primary rounded-pill">Cart<sup>0</sup></a>
+            <a href="{{ url_for('main.cart') }}" class="btn btn-outline-primary rounded-pill"><i class="fas fa-shopping-cart" title="Cart"></i><sup>0</sup></a>
           {% endif %}
-          <a href="{{ url_for('main.account') }}" class="btn btn-outline-primary rounded-pill">Profile</a>
-          <a href="{{ url_for('main.logout') }}" class="btn btn-outline-primary rounded-pill">Logout</a>
-
+                <a href="{{url_for('main.myorders')}}" class="btn btn-outline-primary rounded-pill"><i class="fas fa-box" title="Orders"></i></a>
+          <a href="{{ url_for('main.account') }}" class="btn btn-outline-primary rounded-pill"><i class="fas fa-user" title="Profile"></i></a>
+          <a href="{{ url_for('main.logout') }}" class="btn btn-outline-primary rounded-pill"><i class="fas fa-sign-out-alt" title="Sign-Out"></i></a>
           {% if formpharm is defined %}
             <div class="dropdown">
               <form action="{{url_for('main.set_pharmacy')}}" method="POST">
                 {{formpharm.hidden_tag()}}
-
                 <div class="input-group">
                   {{formpharm.pharmacy(class='form-control bg-light border-0 small')}}
                   <div class="input-group-append">
@@ -112,9 +113,9 @@ s0.parentNode.insertBefore(s1,s0);
             </div>
           {% endif %}
         {% else %}
-          <a href="{{url_for('auth.newlogin')}}" class="btn btn-outline-primary rounded-pill">Login</a>
-          <a href="{{url_for('auth.register', Options=1)}}" class="btn btn-outline-primary rounded-pill">Register Personal Account</a>
-          <a href="{{url_for('auth.registerpharmacy')}}" class="btn btn-outline-primary rounded-pill">Register Pharmacy</a>
+          <a href="{{url_for('auth.newlogin')}}" class="btn btn-outline-primary rounded-pill"><i class="fas fa-sign-in-alt" title="Sign-In"></i></a>
+          <a href="{{url_for('auth.register', Options=1)}}" class="btn btn-outline-primary rounded-pill"><i class="fas fa-user-plus" title="Register"></i></a>
+          <a href="{{url_for('auth.registerpharmacy')}}" class="btn btn-outline-primary rounded-pill"> <i class="fas fa-clinic-medical" title="Pharmacy"></i></a>
         {% endif %}
 
       </div>
@@ -126,7 +127,8 @@ s0.parentNode.insertBefore(s1,s0);
             <div class="dropdown">
               <form action="{{url_for('main.set_pharmacy')}}" method="POST">
                 {{formpharm.hidden_tag()}}
-                {{formpharm.pharmacy.label}}
+                  <i class="fas fa-laptop-medical" title="Sign-Out"></i>
+
                 <div class="input-group">
                   {{formpharm.pharmacy(class='form-control bg-light border-0 small')}}
                   <div class="input-group-append">
@@ -140,15 +142,9 @@ s0.parentNode.insertBefore(s1,s0);
           {% endif %}
                             </div>
               </li>
-                        <!-- Nav Item - Search Dropdown (Visible Only XS) -->
-
-                        <!-- Nav Item - Alerts -->
-
 
                         <div class="topbar-divider d-none d-sm-block"></div>
-
                     </ul>
-
                 </nav>
         </div>
 
@@ -178,13 +174,13 @@ s0.parentNode.insertBefore(s1,s0);
 
     socket.on('order_status_updated', (data) => {
         if (data.user_id === CURRENT_USER_ID) {
-            playSound('/static/sounds/status_update.mp3');
+            playSound('/static/css/noty.mp3');
         }
     });
 
     socket.on('order_accepted', (data) => {
         if (data.user_id === CURRENT_USER_ID) {
-            playSound('/static/sounds/order_accepted.mp3');
+            playSound('/static/css/noty.mp3');
         }
     });
 </script>
@@ -203,7 +199,7 @@ s0.parentNode.insertBefore(s1,s0);
 
     if (data.user_type === currentUserType && data.user_id == currentUserId) {
       alert(data.message);  // Or show custom toast/notification
-      // You could also update the UI dynamically here
+
     }
   });
 </script>

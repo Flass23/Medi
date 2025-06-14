@@ -40,6 +40,16 @@
       </div>
     </div>
   </div>
+   <div class="row mt-3">
+      <div class="col-md-3">
+      <div class="card text-white bg-success mb-3">
+        <div class="card-body">
+          <h5 class="card-title">Monthly Revenue</h5>
+          <p class="card-text">M {{ revenue }}</p>
+        </div>
+      </div>
+    </div>
+   </div>
 
   <div class="row mt-3">
     <div class="col-md-6">
@@ -50,47 +60,10 @@
         </div>
       </div>
     </div>
-
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-header">Average Delivery Time</div>
-        <div class="card-body">
-          <h4>{{ avg_delivery_time }} minutes</h4>
-        </div>
-      </div>
-    </div>
   </div>
 
-  <div class="mt-4">
-    <h4>📋 Recent Deliveries</h4>
-    <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th>Order ID</th>
-          <th>Status</th>
-          <th>Start</th>
-          <th>End</th>
-          <th>Time Taken</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for d in recent_deliveries %}
-        <tr>
-          <td>{{ d.order_id }}</td>
-          <td>{{ d.status }}</td>
-          <td>{{ d.start_time.strftime('%Y-%m-%d %H:%M') if d.start_time }}</td>
-          <td>{{ d.end_time.strftime('%Y-%m-%d %H:%M') if d.end_time }}</td>
-          <td>
-            {% if d.start_time and d.end_time %}
-              {{ ((d.end_time - d.start_time).total_seconds() / 60) | round(1) }} mins
-            {% else %}
-              N/A
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+
   </div>
 </div>
+
 {% endblock %}

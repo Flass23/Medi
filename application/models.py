@@ -3,8 +3,7 @@ import pytz
 from flask_login import UserMixin  # type: ignore
 from itsdangerous import TimedSerializer
 from flask import current_app
-from sqlalchemy.orm import backref, Session
-from sqlalchemy import event
+
 from . import login_manager, db
 from zoneinfo import ZoneInfo
 import secrets
@@ -42,12 +41,8 @@ class Pharmacy(UserMixin, db.Model):
     
     #mpesa
     mpesa_shortcode = db.Column(db.String(100), nullable=False, default="None")
-    mpesa_consumer_key = db.Column(db.String(200), nullable=False, default="None")
-    mpesa_consumer_secret = db.Column(db.String(200), nullable=False, default="None")
-    mpesa_pass_key = db.Column(db.String(200), nullable=False, default="None")
-    #ecocash
-    ecocash_api_key = db.Column(db.String(200), nullable=False, default="None")
-    ecocash_api_secret = db.Column(db.String(100), nullable=False, default="None")
+
+
     ecocash_short_code = db.Column(db.String(100), nullable=False, default="None")
     
     pharma_logo = db.Column(db.String(100), nullable=True)
@@ -165,12 +160,13 @@ class Order(db.Model):
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
     screenshot = db.Column(db.String(120))
+    #prescription = db.Column(db.String(120))
 
     def get_localTime(self):
         return self.create_at.astimezone(ZoneInfo("Africa/Johannesburg"))
 
     def getpharmacyname(self, pharmacy_id):
-        return Pharmacy.query.get_or_404(pharmacy_id) 
+        return Pharmacy.query.get_or_404(pharmacy_id)
 
 
 class Cart(db.Model):
@@ -179,6 +175,7 @@ class Cart(db.Model):
     date_created = db.Column(db.DateTime, default=get_localTime)
     cart_items = db.relationship('CartItem', backref='cart', lazy=True)
     pharmacy_id = db.Column(db.Integer, db.ForeignKey('pharmacy.id', name='fk_pharma_order'), nullable=False)
+
     def calculate_total(self):
        return self.order_items.product_price * self.order_items.quantity
 
@@ -208,6 +205,7 @@ class Delivery(db.Model):
     status = db.Column(db.String(50), default='Out for delivery')
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     order_id = db.Column(db.String(30), db.ForeignKey('order.id', name='fk_delivery_order'))
     orders = db.relationship('Order', backref='delivery', lazy=True)
     delivery_guy_id = db.Column(db.Integer, db.ForeignKey('deliveryguy.id', name='fk_delivery_guy'))
@@ -240,3 +238,10 @@ class Staff(db.Model, UserMixin):
     role = db.Column(db.String(120))
     password = db.Column(db.String(100), nullable=False)
     pharmacy = db.relationship('Pharmacy', backref='Staff_members')
+
+    def __init__(self, names, email, role, password, pharmacy):
+        self.names = names
+        self.email = email
+        self.role = role
+        self.password = password
+        self.pharmacy = pharmacy

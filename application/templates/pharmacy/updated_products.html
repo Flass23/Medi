@@ -3,7 +3,10 @@
 {% block content %}
 
 <section class="orders-section">
-    <table class="orders-table">
+    {%if not product%}
+    <p>There are no products. Add them first.</p>
+    {%else%}
+    <table class="orders-table" style="width:100%; table-layout:fixed;">
   <thead>
     <tr>
       <th>Product Id</th>
@@ -33,7 +36,7 @@
          </button>
       </form>
 
-      <form action="{{url_for('pharmacy.remove_from_products', item_id=product.id)}}" method="POST">
+      <form action="{{url_for('pharmacy.decrement_product', item_id=product.id)}}" method="POST">
          <button value={{product.id}} class='btn' type="submit">-
          </button>
       </form>
@@ -47,6 +50,7 @@
   </tbody>
     {%endfor%}
 </table>
+    {%endif%}
 </section>
 
 {%endblock%}

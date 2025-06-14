@@ -9,6 +9,9 @@
 
         <!-- Active Orders -->
         <section class="order-list" id="active-orders">
+            {%if not orders_completed%}
+            <p>There are no Complete orders</p>
+            {%else%}
             {%for order in orders_completed%}
             <div class="order-card">
                 <h3>Order ID: {{order.order_id}}</h3>
@@ -17,6 +20,7 @@
                 <p>Order Date:{{order.create_at.strftime('%Y - %m - %d @ %H:%M')}}</p>
             </div>
             {%endfor%}
+            {%endif%}
             <!-- Repeat order-card for more orders -->
         </section>
 

@@ -20,6 +20,9 @@ s0.parentNode.insertBefore(s1,s0);
         
         <!-- Active Orders -->
         <section class="order-list" id="active-orders">
+            {%if not order%}
+            <h3>You have no orders active orders just yet. Navigate to menu and add your order. </h3>
+            {%else%}
             {%for order in order%}
             <div class="order-card">
                 <h3>Order ID: {{order.order_id}}</h3>
@@ -29,6 +32,7 @@ s0.parentNode.insertBefore(s1,s0);
                 <p>Order Date: {{order.create_at.strftime('%Y - %m - %d @ %H:%M')}}</p>
             </div>
             {%endfor%}
+            {%endif%}
             <!-- Repeat order-card for more orders -->
         </section>
 

@@ -114,13 +114,15 @@ def send_email(form):
 def load_user(user_id):
     user_type = session.get('user_type')
     if user_type == 'pharmacy':
-        return Pharmacy.query.get(int(user_id))
+        if Pharmacy.query.get(int(user_id)):
+            return Pharmacy.query.get(int(user_id))
+        else:
+            return Staff.query.get(int(user_id))
     elif user_type == 'customer':
         return User.query.get(int(user_id))
     elif user_type == 'delivery_guy':
         return DeliveryGuy.query.get(int(user_id))
-    elif user_type == 'pharmacy_staff':
-        return Staff.query.get(int(user_id))
+
     return None
 
 
@@ -240,10 +242,10 @@ def newlogin():
                 return redirect(url_for('delivery.dashboard'))  # <-- create this route for delivery guy dashboard
             elif staff and bcrypt.check_password_hash(staff.password, form.password.data):
                 login_user(staff)
-                session['user_type'] = staff.role
+                session['user_type'] = 'pharmacy'
                 session['pharmacy_id'] = staff.pharmacy_id
                 session['email'] = staff.email
-                flash(f'Login Successful, welcome {staff.names}')
+                flash(f'Login Successful, welcome {staff.names} and logged in as {session["user_type"]}')
                 return redirect(url_for('pharmacy.adminpage'))
             else:
                 flash("Invalid login credentials", 'danger')

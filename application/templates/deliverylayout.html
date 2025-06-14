@@ -10,9 +10,6 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/productlist.css') }}">
- <link rel="stylesheet" href="{{ url_for('static', filename='css/orders.css') }}">
- <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebars.css') }}">
  <link rel="stylesheet" href="/static/style.css">
  <link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet" />
 
@@ -113,24 +110,14 @@ s0.parentNode.insertBefore(s1,s0);
                             </div>
                         </li>
           {%if current_user.is_authenticated%}
-   
-     
-                    <a href="{{ url_for('delivery.mydeliveries') }}" class="btn btn-outline-primary rounded-pill">My Deliveries</a>
-                    
-                    {%if total_count%}
-                    <a href="{{ url_for('delivery.dashboard') }}" class="btn btn-outline-primary rounded-pill">New Orders<sup>{{total_count}}</sup></a>
-                    {%else%}
-                    <a href="{{ url_for('delivery.dashboard') }}" class="btn btn-outline-primary rounded-pill">New Orders<sup>0</sup></a>
-                    {%endif%}
-                     <a href="{{ url_for('main.logout') }}" class="btn btn-outline-primary rounded-pill">Logout</a>
+                    <a href="{{ url_for('delivery.dashboard') }}" class="btn btn-outline-primary rounded-pill"><i class="fas fa-tachometer-alt" title="Dashboard"></i></a>
+                     <a href="{{ url_for('delivery.mydeliveries') }}" class="btn btn-outline-primary rounded-pill"><i class="fas fa-truck" title="My Deliveries"></i></a>
+                    <a href="{{ url_for('delivery.ready_orders') }}" class="btn btn-outline-primary rounded-pill"><i class="fas fa-plus-square" title="New Orders"></i><sup>{{total_count}}</sup></a>
+                     <a href="{{ url_for('main.logout') }}" class="btn btn-outline-primary rounded-pill"><i class="fas fa-sign-out-alt" title="Sign-Out"></i></a>
                      <div class=dropdown>
-                    
                       <form action="{{url_for('delivery.set_pharmacy')}}" method="POST">
-
                         {{formpharm.hidden_tag()}}
-            
                         {{formpharm.pharmacy.label}}
-
                             <div class="input-group">
                               {{formpharm.pharmacy(class='form-control bg-light border-0 small')}}
                               <div class="input-group-append">
@@ -139,16 +126,13 @@ s0.parentNode.insertBefore(s1,s0);
                             </button>
                               </div>
                           </div>
-                        
-
                     </form>
                     </div>
                      {%else%}
-
-        <a href="{{url_for('auth.newlogin')}}" class="btn btn-outline-primary rounded-pill">Login</a>
-        <a href="{{url_for('auth.register',Options=1)}}" class="btn btn-outline-primary rounded-pill">Register Personal Account</a>
-        <a href="{{url_for('auth.registerpharmacy')}}" class="btn btn-outline-primary rounded-pill">Register Pharmacy</a>
-          {%endif%}
+   <a href="{{url_for('auth.newlogin')}}" class="btn btn-outline-primary rounded-pill"><i class="fas fa-sign-in-alt" title="Sign-In"></i></a>
+          <a href="{{url_for('auth.register', Options=1)}}" class="btn btn-outline-primary rounded-pill"><i class="fas fa-user-plus" title="Register"></i></a>
+          <a href="{{url_for('auth.registerpharmacy')}}" class="btn btn-outline-primary rounded-pill"> <i class="fas fa-clinic-medical" title="Pharmacy"></i></a>
+      {%endif%}
       </div>
     </div>
   </nav>
@@ -179,7 +163,7 @@ s0.parentNode.insertBefore(s1,s0);
     const playSound = (soundPath) => new Audio(soundPath).play();
 
     socket.on('order_ready', (data) => {
-        playSound('/static/sounds/ready_order.mp3');
+        playSound('/static/css/noty.mp3');
     });
 </script>
 <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>

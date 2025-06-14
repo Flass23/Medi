@@ -27,6 +27,9 @@
 
             <img class="image-top" src="{{ url_for('static', filename='css/images/products/'+ product.pictures) }}" alt="{{ product.name }}">
             <div class="product-name">{{ product.productname }}</div>
+            {%if product.category == "Prescription Medication"%}
+            <div class="product-name"> You need a prescription for this Medication</div>
+            {%endif%}
             <div class="product-price">M{{ product.price }}</div>
             <div class="product-description"><p>{{ product.description }}</p></div>
             <a href="{{url_for('main.viewproduct', product_id=product.id)}}">More...</a>

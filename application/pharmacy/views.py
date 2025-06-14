@@ -23,13 +23,7 @@ from ..utils.notification import create_notification
 mypharmacy_product = Pharmacy.products
 mypharmacy_orders = Pharmacy.orders
 bcrypt = Bcrypt()
-def update_product_status(Product):
-    if Product.quantity < 10:
-        Product.warning == "Low Stock"
-    elif Product <= 0:
-        db.session.delete(Product)
-    else:
-        pass
+
 
 
 def save_product_picture(file):
@@ -74,13 +68,15 @@ login_manager.login_view = 'auth.newlogin'
 def load_user(user_id):
     user_type = session.get('user_type')
     if user_type == 'pharmacy':
-        return Pharmacy.query.get(int(user_id))
+        if Pharmacy.query.get(int(user_id)):
+            return Pharmacy.query.get(int(user_id))
+        else:
+            return Staff.query.get(int(user_id))
     elif user_type == 'customer':
         return User.query.get(int(user_id))
     elif user_type == 'delivery_guy':
         return DeliveryGuy.query.get(int(user_id))
-    elif user_type == 'pharmacy_staff':
-        return Staff.query.get(int(user_id))
+
     return None
 
 
@@ -244,7 +240,7 @@ def updateproduct(item_id):
     form = update()
     if form.validate_on_submit():
 
-        product = Product.query.filter(id=item_id, pharmacy_id=mypharmacy.id).first()
+        product = Product.query.filter_by(id=item_id, pharmacy_id=mypharmacy.id).first()
         if product:
             product.productname = form.newname.data
             product.description = form.newdescription.data
@@ -261,8 +257,39 @@ def updateproduct(item_id):
     pharmacy_id = session.get('pharmacy_id')
 
     return render_template('pharmacy/updated_updateproduct.html', form=form, item_id=item_id,
-                           unread_notifications=unread_notifications, pharmacy=pharmacy)
+                           count=count, unread_notifications=unread_notifications, pharmacy=pharmacy)
 
+@pharmacy.route('/ready_orders')
+@login_required
+def ready_orders():
+    mypharmacy = Pharmacy.query.get_or_404(current_user.id)
+    unread_notifications = Notification.query.filter_by(
+        user_type='pharmacy', user_id=mypharmacy.id, is_read=False
+    ).order_by(Notification.timestamp.desc()).all()
+    count = Notification.query.filter_by(
+        user_type='pharmacy', user_id=mypharmacy.id, is_read=False
+    ).order_by(Notification.timestamp.desc()).count()
+
+    form = updatestatusform()
+    readyorders = Order.query.filter(Order.status=="Ready ", Order.pharmacy_id == current_user.id).all()
+    return render_template('pharmacy/readyorder.html',form=form, readyorders=readyorders, pharmacy=mypharmacy,
+                        unread_notifications=unread_notifications, count=count)
+
+@pharmacy.route('/Orders on Delivery')
+@login_required
+def orders_on_delivery():
+    mypharmacy = Pharmacy.query.get_or_404(current_user.id)
+    unread_notifications = Notification.query.filter_by(
+        user_type='pharmacy', user_id=mypharmacy.id, is_read=False
+    ).order_by(Notification.timestamp.desc()).all()
+    count = Notification.query.filter_by(
+        user_type='pharmacy', user_id=mypharmacy.id, is_read=False
+    ).order_by(Notification.timestamp.desc()).count()
+
+    form = updatestatusform()
+    ondelivery = Order.query.filter(Order.status == "Out for Deliver", Order.pharmacy_id == current_user.id).all()
+    return render_template('pharmacy/ondelivery.html', form=form, count=count, ondelivery=ondelivery,
+                           pharmacy=mypharmacy, unread_notifications=unread_notifications)
 
 @pharmacy.route('/ActiveOrders')
 @login_required
@@ -278,15 +305,13 @@ def ActiveOrders():
 
     form = updatestatusform()
     orders = Order.query.filter(Order.status=="Pending", Order.pharmacy_id == current_user.id).all()
-    print(orders)
     approved_order = Order.query.filter(Order.status=="Approved", Order.pharmacy_id == current_user.id).all()
     pharmacy_id = session.get('pharmacy_id')
-    ondelivery = Order.query.filter(Order.status=="Out for Delivery", Order.pharmacy_id == current_user.id).all()
     readyorder = Order.query.filter(Order.status=="Ready ", Order.pharmacy_id == current_user.id).all()
 
     return render_template("pharmacy/updated_orders.html", readyorder=readyorder,
-                           ondelivery=ondelivery, form=form, orders=orders, approved_order=approved_order,
-                           unread_notifications=unread_notifications, pharmacy=pharmacy)
+                           form=form, orders=orders, approved_order=approved_order,
+                           unread_notifications=unread_notifications, pharmacy=pharmacy, count=count)
 
 
 
@@ -308,7 +333,7 @@ def delivered_orders():
     orders = Order.query.filter(Order.status=="Delivered", Order.pharmacy_id == current_user.id).all()
     #total = sum(item.product.price * item.quantity for item in orders.order_items)
     return render_template("pharmacy/updated_Delivered.html", form=form, orders=orders,
-                           unread_notifications=unread_notifications,pharmacy=pharmacy)
+                           unread_notifications=unread_notifications,pharmacy=pharmacy, count=count)
 
 @pharmacy.route('/cancelled')
 @login_required
@@ -328,10 +353,10 @@ def cancelled_orders():
     orders = Order.query.filter(Order.status=="Cancelled", Order.pharmacy_id == current_user.id).all()
     #total = sum(item.product.price * item.quantity for item in orders.order_items)
     return render_template("pharmacy/updated_cancelled.html", form=form, orders=orders,
-                           unread_notifications=unread_notifications,pharmacy=pharmacy)
+                           unread_notifications=unread_notifications,pharmacy=pharmacy, count=count)
 
 
-@pharmacy.route('updatepharmacy')
+@pharmacy.route('updatepharmacy', methods=["POST", "GET"])
 @login_required
 def updatepharmacy():
     mypharmacy = Pharmacy.query.get_or_404(current_user.id)
@@ -356,7 +381,7 @@ def updatepharmacy():
         flash('')
 
     return render_template('pharmacy/updatedetails.html', form=updateForm,
-                           unread_notifications=unread_notifications, pharmacy=pharmacy)
+                           unread_notifications=unread_notifications, count=count, pharmacy=pharmacy)
 
 
 @pharmacy.route('/orders/updatestatus/<int:order_id>', methods=['POST'])
@@ -429,6 +454,7 @@ def addproducts():
                 product.pharmacy_id = mypharmacy.id
                 _image = save_product_picture(file)
                 product.pictures = _image
+
                 db.session.add(product)
                 try:
 
@@ -446,7 +472,7 @@ def addproducts():
     pharmacy_id = session.get('pharmacy_id')
     pharmacy = Pharmacy.query.get_or_404(pharmacy_id)    
     return render_template("pharmacy/updated_addProduct.html", form=form,
-                            unread_notifications=unread_notifications,pharmacy=pharmacy)
+                            unread_notifications=unread_notifications, count=count, pharmacy=pharmacy)
 
 
 @pharmacy.route('/userorders/<int:order_id>', methods=['post', 'get'])
@@ -476,7 +502,7 @@ def userorders(order_id):
         return redirect(url_for('pharmacy.ActiveOrders'))
   
     return render_template('pharmacy/updated_vieworders.html', pharmacy=pharmacy, user_order=user_order,
-                           unread_notifications=unread_notifications,total=total)
+                           unread_notifications=unread_notifications,total=total, count=count)
 
 
 @pharmacy.route('/products')
@@ -497,11 +523,10 @@ def products():
     form3 = addmore()
     form = update()
     product = Product.query.filter(Product.pharmacy_id==mypharmacy.id).all()
-
     pharmacy_id = session.get('pharmacy_id')
     pharmacy = Pharmacy.query.get_or_404(pharmacy_id)
     return render_template('pharmacy/updated_products.html', product=product, form4=form4, form=form, 
-                           pharmacy=pharmacy, form2=form2, unread_notifications=unread_notifications,form3=form3)
+                           pharmacy=pharmacy, count=count, form2=form2, unread_notifications=unread_notifications,form3=form3)
 
 
 
@@ -521,13 +546,18 @@ def remove_from_products(item_id):
 #@role_required('Pharmacy')
 def decrement_product(item_id):
     product = Product.query.filter_by(id=item_id).first()
-    if product > 0:
+    if product.quantity > 0:
         product.quantity -= 1
-
+        if product.quantity <=10:
+            product.warning = "Low on Stock"
         db.session.add(product)
     else:
-        flash('Product depleted, removing from product list.')
-        db.session.delete(product)
+        try:
+            flash('Product depleted, removing from product list.')
+            db.session.delete(product)
+        except IntegrityError:
+            flash('Integrity error.')
+            db.session.rollback()
     db.session.commit()
     return redirect(url_for('pharmacy.products'))
 
@@ -537,11 +567,15 @@ def decrement_product(item_id):
 #@role_required('Pharmacy')
 def add_products(item_id):
     product = Product.query.filter_by(id=item_id).first()
-    if product:
-        product.quantity += 1
-        if product.quantity <= 0:
-            db.session.delete(product)
+    product.quantity = product.quantity+1
+    if product.quantity > 10:
+        product.warning == "Good Quantity"
+        db.session.add(product)
+    else:
+        product.warning == "Low on Stock"
+        db.session.add(product)
     db.session.commit()
+    flash('Product count incremented successfully.')
     return redirect(url_for('pharmacy.products'))
 
 @pharmacy.route('/notifications/read/<int:notification_id>', methods=['POST','GET'])
@@ -557,10 +591,17 @@ def mark_notification_read(notification_id):
 def addstaff():
     form = addstaffform()
     pharmacy = Pharmacy.query.get_or_404(session.get('pharmacy_id'))
+
+    unread_notifications = Notification.query.filter_by(
+        user_type='pharmacy', user_id=pharmacy.id, is_read=False
+    ).order_by(Notification.timestamp.desc()).all()
+    count = Notification.query.filter_by(
+        user_type='pharmacy', user_id=pharmacy.id, is_read=False
+    ).order_by(Notification.timestamp.desc()).count()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        newstuff = Staff(names=form.names.data, email=form.email.data, role=form.role.data,
-                         password=hashed_password)
+        newstuff = Staff(names=form.names.data, email=form.email.data, role=form.role.data, password=hashed_password,
+                         pharmacy=pharmacy)
 
         if newstuff:
             try:
@@ -576,7 +617,7 @@ def addstaff():
         else:
             flash('Could not add stuff member')
     return render_template('pharmacy/addstaff.html',
-                           pharmacy=pharmacy,form=form)
+                           pharmacy=pharmacy,form=form, count=count, unread_notifications=unread_notifications)
 
 
 @pharmacy.route('/layout', methods=["POST", "GET"])

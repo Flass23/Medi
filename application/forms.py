@@ -115,9 +115,12 @@ class confirmpurchase(FlaskForm):
     latitude = HiddenField('Latitude')
     logitude = HiddenField('Longitude')
     payment_screenshot = FileField('Upload Proof of Payment', validators=[FileAllowed(['jpg', 'jpeg', 'png'])])
-
+    redeem = BooleanField('Redeem point for delivery')
     drop_address = StringField('Delivery Address (be specific as possible - room number, village, landmarks, nearby places))')
     submit = SubmitField("Buy Cart")
+
+class upload_prescription(FlaskForm):
+    file = FileField('Upload Prescription', validators=[FileAllowed(['jpg', 'jpeg', 'png'])])
 
 
 class ProductForm(FlaskForm):

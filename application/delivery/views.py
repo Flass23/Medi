@@ -60,20 +60,41 @@ def save_delivery_picture(file):
 @delivery.route('/dashboard', methods=["GET", "POST"])
 @login_required
 def dashboard():
+
+
     pharmacy = Pharmacy.query.get_or_404(session.get('pharmacy_id'))
     formpharm = Set_PharmacyForm()
     formpharm.pharmacy.choices=[(-1, "Select a Pharmacy")] + [(p.id, p.name) for p in Pharmacy.query.all()]
+    deliveries = Delivery.query.filter_by(delivery_guy_id=current_user.id).all()
 
-    #the dashboard will show orders
-    ready_orders = Order.query.filter(Order.status=='Ready ', Order.pharmacy_id==session.get('pharmacy_id')).order_by(desc(Order.create_at)).all()
+    total = len(deliveries)
+    delivered = [d for d in deliveries if d.status == 'Delivered']
+    revenue=len(delivered) * 10
+    cancelled = [d for d in deliveries if d.status == 'Cancelled']
+    in_progress = [d for d in deliveries if d.status not in ['Delivered', 'Cancelled']]
 
-    return render_template('delivery/deliverydashboard.html',formpharm=formpharm, pharmacy=pharmacy, ready_orders=ready_orders)
+    success_rate = (len(delivered) / total * 100) if total !=0 else 0
 
+    # Average delivery time (assumes Delivery model has `start_time` and `end_time` as datetime fields)
+    #total_time = sum([(d.end_time - d.start_time).total_seconds() for d in delivered if d.start_time and d.end_time], 0)
+    #avg_delivery_time = total_time / len(delivered) / 60 if delivered else 0  # in minutes
+
+    #recent_deliveries = sorted(deliveries, key=lambda d: d.end_time or d.id, reverse=True)[:5]
+
+    return render_template('delivery/deliverystats.html',
+                           total=total,
+                           delivered=len(delivered),
+                           in_progress=len(in_progress),
+                           cancelled=len(cancelled),
+                           pharmacy=pharmacy,
+                           revenue=revenue,
+                           formpharm=formpharm,
+                           success_rate=round(success_rate, 2),
+                          )
 @delivery.route('/takeorder/<int:order_id>', methods=["GET", "POST"])
 @login_required
 def takeorder(order_id):
     order = Order.query.filter(Order.id==order_id, Order.status=='Ready ', Order.pharmacy_id==session.get('pharmacy_id')).first()
-
     existing_deliveries_count = db.session.query(Delivery).join(Order).filter(Delivery.delivery_guy_id == current_user.id, Order.status == "Out for Delivery").count()
     
     if existing_deliveries_count >= 5:
@@ -91,6 +112,7 @@ def takeorder(order_id):
     order.status = "Out for Delivery"
 
     try:
+        db.session.add(order)
         db.session.add(new_delivery)
         db.session.commit()
 
@@ -131,8 +153,17 @@ def mydeliveries():
     return render_template('delivery/ActiveOrder.html', myform=myform, pharmacy=pharmacy,
                            deliveries=deliveries, delivery_update=delivery_update,formpharm=formpharm)
 
-
-
+@delivery.route('/ready orders')
+@login_required
+def ready_orders():
+    pharmacy = Pharmacy.query.get_or_404(session.get('pharmacy_id'))
+    myform = updatedeliveryform()
+    delivery_update = updatedeliveryform()
+    formpharm=Set_PharmacyForm()
+    formpharm.pharmacy.choices=[(-1, "Select a Pharmacy")] + [(p.id, p.name) for p in Pharmacy.query.all()]
+    ready = Order.query.filter(Order.status == "Ready ", Order.pharmacy_id == session.get('pharmacy_id')).all()
+    return render_template('delivery/deliverydashboard.html', ready_orders=ready, myform=myform, pharmacy=pharmacy,
+                           delivery_update=delivery_update,formpharm=formpharm)
 
 
 @delivery.route('/update_delivery/<int:delivery_id>', methods=["GET", "POST"])
@@ -150,39 +181,23 @@ def update_delivery(delivery_id):
             return redirect(url_for('delivery.mydeliveries'))
 
         delivery.status = new_status
-
+        order = Order.query.filter(Order.order_id == delivery.order_id).first()
+        order.status = form.status.data
         if form.delivery_prove.data:
             image_filename = save_delivery_picture(form.delivery_prove.data)
             delivery.customer_pic = image_filename
-
         try:
             db.session.add(delivery)
+            db.session.add(order)
             db.session.commit()
-
             # 🔔 Message
             message = f"Delivery #{delivery.id} status changed from {old_status} to {new_status}"
 
-            # 🔔 Notify customer & emit event
-            if delivery.orders.user_id:
-                create_notification(user_type='customer', user_id=delivery.order.user_id, message=message)
-                socketio.emit('delivery_status_update', {
-                    'user_type': 'customer',
-                    'user_id': delivery.customer_id,
-                    'delivery_id': delivery.id,
-                    'status': new_status,
-                    'message': message
-                }, namespace='/notifications', broadcast=True)
+            create_notification(user_type='customer', user_id=order.user_id, message=message)
 
             # 🔔 Notify pharmacy & emit event
 
-            create_notification(user_type='pharmacy', user_id=delivery.pharmacy_id, message=message)
-            socketio.emit('delivery_status_update', {
-                    'user_type': 'pharmacy',
-                    'user_id': delivery.pharmacy_id,
-                    'delivery_id': delivery.id,
-                    'status': new_status,
-                    'message': message
-                }, namespace='/notifications', broadcast=True)
+            create_notification(user_type='pharmacy', user_id=order.pharmacy_id, message=message)
 
             flash('Delivery status successfully updated.')
 
@@ -202,9 +217,10 @@ def deliverylayout():
     pharmacies = Pharmacy.query.all()
     total_count = 0
     pharmacy = Pharmacy.query.get_or_404(session.get('pharmacy_id'))
-    total_count = Order.query.filter(Order.pharmacy_id == session.get('pharmacy_id'), Order.status == "Ready", )
+    total_count = Order.query.filter(Order.pharmacy_id == session.get('pharmacy_id'), Order.status == "Ready").all().count()
     formpharm.pharmacy.choices = [(p.id, p.name) for p in pharmacies]
-    return render_template('deliverylayout.html', formpharm=formpharm, total_count=total_count, pharmacy=pharmacy)
+    return render_template('deliverylayout.html', formpharm=formpharm, total_count=total_count,
+                           pharmacy=pharmacy)
 
 @delivery.route('/set_pharmacy', methods=['POST', 'GET'])
 def set_pharmacy():
@@ -221,32 +237,4 @@ def set_pharmacy():
         return redirect(url_for('delivery.dashboard'))
 
 
-@delivery.route('/deliverystats')
-@login_required
-def deliverystats():
-    delivery_guy_id = current_user.id
-
-    deliveries = Delivery.query.filter_by(delivery_guy_id=delivery_guy_id).all()
-    total = len(deliveries)
-
-    delivered = [d for d in deliveries if d.status == 'Delivered']
-    cancelled = [d for d in deliveries if d.status == 'Cancelled']
-    in_progress = [d for d in deliveries if d.status not in ['Delivered', 'Cancelled']]
-
-    success_rate = (len(delivered) / total * 100) if total else 0
-
-    # Average delivery time (assumes Delivery model has `start_time` and `end_time` as datetime fields)
-    total_time = sum([(d.end_time - d.start_time).total_seconds() for d in delivered if d.start_time and d.end_time], 0)
-    avg_delivery_time = total_time / len(delivered) / 60 if delivered else 0  # in minutes
-
-    recent_deliveries = sorted(deliveries, key=lambda d: d.end_time or d.id, reverse=True)[:5]
-
-    return render_template('delivery/my_stats.html',
-                           total=total,
-                           delivered=len(delivered),
-                           in_progress=len(in_progress),
-                           cancelled=len(cancelled),
-                           success_rate=round(success_rate, 2),
-                           avg_delivery_time=round(avg_delivery_time, 2),
-                           recent_deliveries=recent_deliveries)
 

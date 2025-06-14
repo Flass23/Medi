@@ -12,17 +12,21 @@
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    overflow:none;
 }
 
 .orders-table th, .orders-table td {
     border: 1px solid #ddd;
     padding: 12px;
     text-align: center;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space: nowrap;
 }
 
 .orders-table th {
     background-color: #4e73df;
-    color: white;
+    color: white;   ``
 }
 
 .orders-table td {

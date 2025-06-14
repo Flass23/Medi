@@ -8,22 +8,30 @@
         <p>Cart is Empty</p>
     {%else%}
     <div class="cart">
+<h2>Payment Codes</h2>
+        <p>Mpesa Till: {{pharmacy.mpesa_shortcode}}</p>
 
+        <p>Ecocash Till: {{pharmacy.ecocash_short_code}}</p>
         <table>
             <thead>
                 <tr>
                     <th>Item</th>
                     <th>Price</th>
                     <th>Quantity</th>
+                     <th>Upload Prescription</th>
                     <th>Remove</th>
                 </tr>
             </thead>
             {%for items in cart.cart_items%}
             <tbody id="cart-items">
+            {%if items.product.category == "Prescription Medication"%}
+
                 <!-- Items will be dynamically added here -->
             <td>{{items.product.productname}}</td>
             <td>M{{items.product.price}}</td>
             <td>{{items.quantity}}</td>
+            <td>Upload prescription proof here</td>
+
 
             <td>
                 <form action="{{url_for('main.remove_from_cart',item_id=items.id)}}" method="POST">
@@ -31,6 +39,18 @@
                     {{form2.submit(class='buybtn')}}
                 </form>
             </td>
+            {%else%}
+            <td>{{items.product.productname}}</td>
+            <td>M{{items.product.price}}</td>
+            <td>{{items.quantity}}</td>
+            <td> Requires no prescription</td>
+            <td>
+                <form action="{{url_for('main.remove_from_cart',item_id=items.id)}}" method="POST">
+                    {{form2.csrf_token}}
+                    {{form2.submit(class='buybtn')}}
+                </form>
+            </td>
+            {%endif%}
             </tbody>
 
             {%endfor%}
@@ -49,6 +69,7 @@
                     {{form3.payment_number.label}}
                     {{form3.payment_number(class='form-control')}}
                 </div>
+
                 <div class="form-group">
                     {{form3.transid.label}}
                     {{form3.transid(class='form-control')}}
@@ -64,8 +85,8 @@
 
                     {{form3.latitude()}}
                     {{form3.logitude()}}
-                    <button onclick="getLocation()" class="btn btn-light btn-sm">
-                        Use your Current Location as Destination Address(recommended)
+                    <button type="button" onclick="getLocation()" class="btn btn-light btn-sm">
+                        Use my current location(recommended)
                     </button>
     <div class="button-container">
         <!-- Shop Button -->

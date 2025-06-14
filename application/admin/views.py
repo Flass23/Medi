@@ -28,6 +28,7 @@ def save_product_picture(file):
     # Get the file extension
     _, f_ex = os.path.splitext(file.filename)
 
+
     # Generate the final filename (random + extension)
     post_img_fn = random_hex + f_ex
 
