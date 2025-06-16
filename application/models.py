@@ -37,12 +37,8 @@ class Pharmacy(UserMixin, db.Model):
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float) 
 
-    ## payments from research
-    
     #mpesa
     mpesa_shortcode = db.Column(db.String(100), nullable=False, default="None")
-
-
     ecocash_short_code = db.Column(db.String(100), nullable=False, default="None")
     
     pharma_logo = db.Column(db.String(100), nullable=True)
@@ -177,7 +173,7 @@ class Cart(db.Model):
     pharmacy_id = db.Column(db.Integer, db.ForeignKey('pharmacy.id', name='fk_pharma_order'), nullable=False)
 
     def calculate_total(self):
-       return self.order_items.product_price * self.order_items.quantity
+       return sum(item.product.price * item.quantity for item in self.cart_items)
 
 
 class OrderItem(db.Model):

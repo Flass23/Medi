@@ -569,11 +569,10 @@ def add_products(item_id):
     product = Product.query.filter_by(id=item_id).first()
     product.quantity = product.quantity+1
     if product.quantity > 10:
-        product.warning == "Good Quantity"
+        product.warning = "Quantity Good"
         db.session.add(product)
-    else:
-        product.warning == "Low on Stock"
-        db.session.add(product)
+        print(f'updated quantity {product.warning}')
+
     db.session.commit()
     flash('Product count incremented successfully.')
     return redirect(url_for('pharmacy.products'))

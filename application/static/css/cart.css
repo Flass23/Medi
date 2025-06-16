@@ -13,6 +13,7 @@ table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
+    min-width:600px;
 }
 
 th, td {
@@ -29,6 +30,17 @@ th {
     margin-top: 20px;
     font-size: 18px;
     font-weight: bold;
+}
+@media (max-width: 600px){
+th,td{
+    font-size:12px;
+    padding:6px;
+    }
+    table
+    {
+    width:90%;
+    border-collapse: collapse;
+    margin-bottom: 20px;}
 }
 
 
