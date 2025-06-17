@@ -186,7 +186,6 @@ class OrderItem(db.Model):
 
 class DeliveryGuy(db.Model, UserMixin):
     __tablename__ = 'deliveryguy'
-
     id = db.Column(db.Integer, primary_key=True)
     names = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(30), unique=True, nullable=False)
