@@ -164,6 +164,7 @@ def landing():
 def cart():
     form = CartlistForm()
     form2 = removefromcart()
+    redeem = redeempoints()
     form3 = confirmpurchase()
     pres = upload_prescription()
     formpharm = Set_PharmacyForm()
@@ -181,20 +182,28 @@ def cart():
 
     if cart:
         total_amount = sum(item.product.price * item.quantity for item in cart.cart_items)
-        
-        if total_amount > 250:
-            #free delivery
-            pass
-        else:
-            total_amount = total_amount + 13 ## include transportation fees
-            
-
-
     return render_template('customer/updated_cartlist.html', form=form, form3=form3, form2=form2,
-                           cart=cart, user=user,formpharm=formpharm, pharmacy=pharmacy,
+                           cart=cart, redeem=redeem, user=user,formpharm=formpharm, pharmacy=pharmacy,
                            total_amount=total_amount, total_count=total_count, pres=pres)
 
-
+'''@main.route('/redeempoints/<int:cart_id>', methods=["POST", "GET"])
+@login_required
+def redeempoints(cart_id):
+    cart = Cart.query.get_or_404(cart_id)
+    user = User.query.get_or_404(cart.user_id)
+    total_amount = sum(item.product.price * item.quantity for item in cart.cart_items)
+    if total_amount > 50:
+        if user.loyalty_points >= 150:
+            user.loyalty_points - 150
+            flash('Redeemed Points for Delivery')
+            return redirect(url_for('main.cart'))
+        else:
+            flash(f'You do not qualify for point redemption yet. {150 - user.loyalty_points } points remaining. Keep Ordering.')
+            return redirect(url_for('main.cart'))
+    else:
+        flash(f'Order amount less than M50.00. Increase your current order amount by M{50 - total_amount} to qualify ')
+    return redirect(url_for('main.cart'))
+'''
 @main.route('/about', methods=['POST', 'GET'])
 def about():
     formpharm = Set_PharmacyForm()

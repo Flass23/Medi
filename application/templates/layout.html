@@ -65,17 +65,7 @@
       }
     }
   </script>
-  <script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/68434ad6706334190d799301/default';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
+
 
 
             <!-- Main Content -->
@@ -123,7 +113,7 @@ s0.parentNode.insertBefore(s1,s0);
               <li class="nav-item dropdown no-arrow d-sm-none">
                             <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
                                 aria-labelledby="searchDropdown">
- {% if formpharm is defined %}
+ <!--{% if formpharm is defined %} -->
             <div class="dropdown">
               <form action="{{url_for('main.set_pharmacy')}}" method="POST">
                 {{formpharm.hidden_tag()}}
@@ -139,7 +129,7 @@ s0.parentNode.insertBefore(s1,s0);
                 </div>
               </form>
             </div>
-          {% endif %}
+          <!--{% endif %} -->
                             </div>
               </li>
 
